@@ -32,7 +32,7 @@ public final class ToolsEnabledAIService: AIServiceProtocol, @unchecked Sendable
             let customAdapterModel = SystemLanguageModel(adapter: adapter)
 
             session = LanguageModelSession(
-//                model: customAdapterModel,
+// NEXT: enable this                model: customAdapterModel,
                 tools: [WriteUbersichtWidgetToFileSystem(),
 //                        ListDataSourcesTool()
                        ],
