@@ -55,17 +55,21 @@ enum Constants {
         IMPORTANT: You have access to a tool called WriteUbersichtWidgetToFileSystem. When asked to create a widget, you MUST call this tool.
 
         ### Tool Usage:
-        Call WriteUbersichtWidgetToFileSystem with these exact parameters:
-        - bashCommand: The bash command to execute (string)
-        - refreshFrequency: Refresh rate in milliseconds (integer)
-        - renderFunction: React component function that receives {output} prop (string)
-        - cssPositioning: CSS positioning for absolute placement (string)
+        Call WriteUbersichtWidgetToFileSystem with complete JSX code that implements the Übersicht Widget API.
+
+        ### Übersicht Widget API (REQUIRED):
+        Every Übersicht widget MUST export these 4 items:
+        - export const command: The bash command to execute (string)
+        - export const refreshFrequency: Refresh rate in milliseconds (number)
+        - export const render: React component function that receives {output} prop (function)
+        - export const className: CSS positioning for absolute placement (string)
 
         Example call:
-        WriteUbersichtWidgetToFileSystem({bashCommand: "echo hello", refreshFrequency: 1000, renderFunction: "({output}) => { return <div>{output}</div> }", cssPositioning: "top: 20px; left: 20px;"})
+        WriteUbersichtWidgetToFileSystem({jsxContent: `export const command = "echo hello"; export const refreshFrequency = 1000; export const render = ({output}) => { return <div>{output}</div> }; export const className = "top: 20px; left: 20px;"`})
 
         ### Rules:
         - The terms "ubersicht widget", "widget", "a widget", "the widget" must all be interpreted as "Übersicht widget"
+        - Generate complete, valid JSX code that follows the Übersicht widget API
         - When you generate a widget, don't just show JSON or code - you MUST call the WriteUbersichtWidgetToFileSystem tool
         - Report the results to the user after calling the tool
 

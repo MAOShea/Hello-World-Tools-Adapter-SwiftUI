@@ -22,22 +22,32 @@ public final class ToolsEnabledAIService: AIServiceProtocol, @unchecked Sendable
 
         do
         {
-            // The absolute path to your adapter.
-            let localURL = URL(filePath: "/Users/mike/Downloads/uebersicht_widgets.fmadapter")
-            
-            // An instance of the the system language model using your adapter.
-            let adapter = try SystemLanguageModel.Adapter(fileURL: localURL)
-            
-            // An instance of the the system language model using your adapter.
-            let customAdapterModel = SystemLanguageModel(adapter: adapter)
+            let useAdapter = false // Set this based on your needs
 
-            session = LanguageModelSession(
-// NEXT: enable this                model: customAdapterModel,
-                tools: [WriteUbersichtWidgetToFileSystem(),
-//                        ListDataSourcesTool()
-                       ],
-                instructions: Constants.Prompts.humanRolePrompt2
-            )
+            if useAdapter {
+                // The absolute path to your adapter.
+                let localURL = URL(filePath: "/Users/mike/Downloads/uebersicht_widgets.fmadapter")
+                
+                // An instance of the the system language model using your adapter.
+                let adapter = try SystemLanguageModel.Adapter(fileURL: localURL)
+                
+                // An instance of the the system language model using your adapter.
+                let customAdapterModel = SystemLanguageModel(adapter: adapter)
+                session = LanguageModelSession(
+                    model: customAdapterModel,
+                    tools: [WriteUbersichtWidgetToFileSystem(),
+    //                        ListDataSourcesTool()
+                        ]
+                )
+            }
+            else {
+                session = LanguageModelSession(
+                    tools: [WriteUbersichtWidgetToFileSystem(),
+    //                        ListDataSourcesTool()
+                        ],
+                    instructions: Constants.Prompts.humanRolePrompt2
+                )
+            }
             session.prewarm()
         } catch {
             fatalError("Failed to create session with adapter: \(error.localizedDescription)")
