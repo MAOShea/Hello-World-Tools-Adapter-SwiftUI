@@ -44,7 +44,7 @@ enum Constants {
         IMPORTANT: You have access to a tool called WriteUbersichtWidgetToFileSystem. When asked to create a widget, you MUST call this tool.
 
         Call it like this:
-        WriteUbersichtWidgetToFileSystem({bashCommand: "echo hello", refreshFrequency: 1000, renderFunction: "return <div>{output}</div>", cssPositioning: "top: 20px; left: 20px;"})
+        WriteUbersichtWidgetToFileSystem({jsxContent: `export const command = "echo hello"; export const refreshFrequency = 1000; export const render = ({output}) => { return <div>{output}</div> }; export const className = "top: 20px; left: 20px;"`})
 
         Rules: "widget" = "Übersicht widget". When you generate a widget, don't just show JSON, rather, call the WriteUbersichtWidgetToFileSystem tool.
         """
