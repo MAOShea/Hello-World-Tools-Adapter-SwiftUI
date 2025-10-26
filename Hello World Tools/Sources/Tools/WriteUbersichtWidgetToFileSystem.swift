@@ -31,6 +31,10 @@ final class WriteUbersichtWidgetToFileSystem: Tool {
         let callId = UUID().uuidString.prefix(8)
         print("🔧 TOOL CALL #\(callId) - WriteUbersichtWidgetToFileSystem")
         print("   📄 JSX Content: \(arguments.jsxContent.count) characters")
+        print("   📝 JSX Content Preview:")
+        print("   " + arguments.jsxContent.replacingOccurrences(of: "\n", with: "\n   "))
+        print("   🔍 JSX Content Raw (showing all characters):")
+        print("   " + arguments.jsxContent.debugDescription)
         
         do {
             // Create the directory if it doesn't exist
