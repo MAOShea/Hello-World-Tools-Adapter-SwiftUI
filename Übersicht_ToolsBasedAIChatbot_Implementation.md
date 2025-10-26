@@ -212,8 +212,116 @@ Do NOT just show the JSX code - you MUST call the tool immediately.
 
 ## Current Status
 - **Tool calling**: ✅ Working with simple prompt
-- **JSX generation**: ✅ Working correctly
+- **JSX generation**: ⚠️ Base model has issues with string delimiters and syntax
 - **File writing**: ✅ Working correctly
+
+## LoRA Adapter Training Guide
+
+### Current Working Configuration for Training
+
+**System Prompt (Use in Training Data):**
+```
+You are an Übersicht widget designer. Create Übersicht widgets when requested by the user.
+
+IMPORTANT: You have access to a tool called WriteUbersichtWidgetToFileSystem. When asked to create a widget, you MUST call this tool.
+
+### Tool Usage:
+Call WriteUbersichtWidgetToFileSystem with complete JSX code that implements the Übersicht Widget API. Generate custom JSX based on the user's specific request - do not copy the example below.
+
+### Übersicht Widget API (REQUIRED):
+Every Übersicht widget MUST export these 4 items:
+- export const command: The bash command to execute (string)
+- export const refreshFrequency: Refresh rate in milliseconds (number)
+- export const render: React component function that receives {output} prop (function)
+- export const className: CSS positioning for absolute placement (string)
+
+Example format (customize for each request):
+WriteUbersichtWidgetToFileSystem({jsxContent: `export const command = "echo hello"; export const refreshFrequency = 1000; export const render = ({output}) => { return <div>{output}</div>; }; export const className = "top: 20px; left: 20px;"`})
+
+### Rules:
+- The terms "ubersicht widget", "widget", "a widget", "the widget" must all be interpreted as "Übersicht widget"
+- Generate complete, valid JSX code that follows the Übersicht widget API
+- When you generate a widget, don't just show JSON or code - you MUST call the WriteUbersichtWidgetToFileSystem tool
+- Report the results to the user after calling the tool
+
+### Examples:
+- "Generate a Übersicht widget" → Use WriteUbersichtWidgetToFileSystem tool
+- "Can you add a widget that shows the time" → Use WriteUbersichtWidgetToFileSystem tool
+- "Create a widget with a button" → Use WriteUbersichtWidgetToFileSystem tool
+```
+
+**Tool Definition (Include in Training Data):**
+```json
+{
+  "type": "function",
+  "function": {
+    "name": "WriteUbersichtWidgetToFileSystem",
+    "description": "Writes an Übersicht Widget to the file system. Call this tool as the last step in processing a prompt that generates a widget.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "jsxContent": {
+          "type": "string",
+          "description": "Complete JSX code for an Übersicht widget. This should include all required exports: command, refreshFrequency, render, and className. The JSX should be a complete, valid Übersicht widget file."
+        }
+      },
+      "required": ["jsxContent"]
+    }
+  }
+}
+```
+
+### Critical Training Data Requirements
+
+1. **Include tool_calls in Assistant Responses**: Every training example must have `tool_calls` in the assistant's response, not just JSX code.
+
+2. **Valid JSX Syntax**: The base model struggles with string delimiters and JSX syntax. The adapter must learn to generate syntactically correct JavaScript/JSX code with proper string escaping.
+
+3. **Complete JSX Structure**: Every example must include all 4 required exports:
+   - export const command: The bash command to execute (string)
+   - export const refreshFrequency: Refresh rate in milliseconds (number)
+   - export const render: React component function that receives {output} prop (function)
+   - export const className: CSS positioning for absolute placement (string)
+
+4. **Tool Call Format**: Assistant responses must include:
+   ```json
+   {
+     "role": "assistant",
+     "content": "I'll create that widget for you.",
+     "tool_calls": [
+       {
+         "id": "[unique_call_id]",
+         "type": "function",
+         "function": {
+           "name": "WriteUbersichtWidgetToFileSystem",
+           "arguments": "{\"jsxContent\": \"[complete JSX widget code here]\"}"
+         }
+       }
+     ]
+   }
+   ```
+
+### Training Data Design: Concrete vs Abstract
+
+**Use Concrete (Specific) Examples When:**
+- **Structure/Format**: Exact JSON structure, parameter names, syntax requirements
+- **API Contracts**: Required exports, function signatures, tool definitions
+- **Format Patterns**: How to structure tool calls, response formats
+
+**Use Abstract (Generic) Examples When:**
+- **Content Values**: Specific widget implementations, command strings, CSS values
+- **Variable Names**: IDs, identifiers that should be unique
+- **Placeholder Content**: Areas where the model should generate custom content
+
+**Key Principle**: Be concrete about structure, abstract about content. The model needs to see exact formats but understand that content should be customized for each request.
+
+### Key Insights for Adapter Training
+
+- **Tool calling is behavioral, not instructional** - The adapter needs to see actual tool calls in training data
+- **Base model JSX limitations** - The base model has issues with string delimiters and JSX syntax that a trained adapter should overcome
+- **Simple prompts work better** - Complex formatting instructions confuse the AI
+- **Use the exact working system prompt** - Don't modify what already works with the base model
+- **Focus on JSX quality** - The adapter should become a JSX specialist, not just a tool caller
 
 ## Next Implementation Steps
 
