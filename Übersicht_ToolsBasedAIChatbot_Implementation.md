@@ -168,9 +168,56 @@ export const className = "<provided-css-positioning>"
 
 - generate a widget that contains a button labelled “I love you.”
 
+## Tool Calling Lessons Learned
+
+### What Works for Tool Calling
+- **Simple, direct prompts** - Clear instructions without complexity
+- **Concise examples** - Single-line tool call examples work better than multi-line
+- **Direct commands** - "Call the tool" rather than "show how to call the tool"
+- **Minimal redundancy** - Avoid multiple ways of saying the same thing
+
+### What Breaks Tool Calling
+- **Complex formatting instructions** - Detailed JSX syntax guidance confuses the AI
+- **Multi-line examples** - Makes AI think it should demonstrate rather than execute
+- **Multiple imperative statements** - "AUTOMATICALLY", "CRITICAL", "Do NOT" create confusion
+- **Over-detailed prompts** - More instructions make tool calling worse, not better
+
+### Key Insight
+**Tool calling is behavioral, not instructional.** The AI needs to understand it should **act**, not **teach**. Adding more instructions actually makes it worse by confusing the AI about its role.
+
+### Working Prompt Pattern
+```
+You are a widget designer. Create widgets when requested.
+
+IMPORTANT: You have access to a tool called WriteUbersichtWidgetToFileSystem. 
+When asked to create a widget, you MUST call this tool.
+
+[Simple example]
+[Basic rules]
+```
+
+### Broken Prompt Pattern
+```
+You are a widget designer. Create widgets when requested.
+
+IMPORTANT: You have access to a tool called WriteUbersichtWidgetToFileSystem. 
+When asked to create a widget, you MUST call this tool AUTOMATICALLY. 
+Do NOT just show the JSX code - you MUST call the tool immediately.
+
+[Complex multi-line example]
+[Detailed formatting instructions]
+[Multiple redundant rules]
+[CRITICAL statements]
+```
+
+## Current Status
+- **Tool calling**: ✅ Working with simple prompt
+- **JSX generation**: ✅ Working correctly
+- **File writing**: ✅ Working correctly
+
 ## Next Implementation Steps
 
-1. **Refine Tool Invocation**: Continue refining prompt so “widget” is always interpreted as “Übersicht widget,” ensuring consistent tool invocation.
+1. **Refine Tool Invocation**: Continue refining prompt so "widget" is always interpreted as "Übersicht widget," ensuring consistent tool invocation.
 2. **Enforce JSX Content Rules**: Further reinforce that AI-generated `jsx_content` must be JSX markup only—no function wrappers, no `return`, and no extraneous syntax.
 3. **Solidify Style Variable Contracts**: Ensure the AI always outputs style variable names ending in `Style`, references them as `className={variable}` in JSX, and matches all such variables in the style dictionary.
 4. **Playground & Integration Testing**: Use Xcode Playgrounds and app integration to validate proper tool output and UI rendering.
