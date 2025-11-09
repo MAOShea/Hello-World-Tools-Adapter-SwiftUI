@@ -25,7 +25,7 @@ struct ContentView: View {
                                     .foregroundColor(.secondary)
                                 
 /*                                 Button("🚀 Boot Up as Widget Designer") {
-                                    viewModel.bootUpWithRole(firstPrompt: Constants.Prompts.humanRolePrompt)
+                                    viewModel.bootUpWithRole(firstPrompt: Constants.Prompts.systemPrompt_v1)
                                 }
                                 .buttonStyle(.borderedProminent)
                                 .disabled(viewModel.isLoading)

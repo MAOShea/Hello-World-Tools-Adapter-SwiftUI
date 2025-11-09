@@ -100,7 +100,7 @@ Input:
 ```swift
 let session = LanguageModelSession(tools: tools) {
     Instructions {
-        Constants.Prompts.humanRolePrompt
+        Constants.Prompts.systemPrompt_v1
     }
 }
 ```
