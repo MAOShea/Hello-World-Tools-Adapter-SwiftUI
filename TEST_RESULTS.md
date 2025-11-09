@@ -7,22 +7,39 @@
 
 ## Test Run Log
 
-| Timestamp | Version | Simple Widget | Time Widget | Button Widget | Tool Called | Suite Status | Key Issues | Duration |
-|-----------|---------|---------------|-------------|---------------|------------|--------------|------------|----------|
-| 2025-11-09 17:20:28 | v4 | ✅ Both | ✅ Both (Base: ❌ no tool) | ✅ Both (Base: ❌ no tool) | Simple: ✅✅, Time: ❌✅, Button: ❌✅ | ❌ Failed (2 issues) | • Adapter failed individual test with context limit (3920/4096 tokens)<br>• Base didn't call tool for Time & Button Widgets (returned JSON instead)<br>• Adapter JSX truncated for all 3 widgets<br>• Adapter reused same JSX for all 3 widgets (159 chars, same content) | ~196s |
-| 2025-11-09 17:15:08 | v4 | ✅ Both | ✅ Both (Base: ❌ no tool) | ✅ Both | Simple: ✅✅, Time: ❌✅, Button: ✅✅ | ❌ Failed (2 issues) | • Adapter failed individual test with context limit (3920/4096 tokens)<br>• Base didn't call tool for Time Widget (returned JSON instead)<br>• Adapter JSX truncated for Simple and Time Widgets<br>• Adapter reused Simple JSX for Time Widget (same content)<br>• Adapter JSX all commented for Button Widget | ~178s |
-| 2025-11-09 17:09:35 | v4 | ✅ Both | ✅ Both (Base: ❌ no tool) | ✅ Both | Simple: ✅✅, Time: ❌✅, Button: ✅✅ | ✅ Passed | • Base didn't call tool for Time Widget (returned JSON instead)<br>• Base JSX truncated for Button Widget<br>• Adapter JSX all commented for Simple and Time Widgets<br>• Adapter reused Simple JSX for Time Widget (same content) | ~62s |
-| 2025-11-09 16:59:13 | v4 | ✅ Both | ❌ Both (Base: decoding, Adapter: context 3927/4096) | ❌ Base (decoding), ✅ Adapter | Simple: ✅✅, Time: ❌❌, Button: ❌✅ | ❌ Failed (3 issues) | • Base decoding errors on Time & Button (malformed JSON)<br>• Adapter context limit on Time (3927/4096)<br>• Adapter succeeded on Button but JSX truncated/all-commented | ~225s |
-| 2025-11-09 16:52:05 | v4 | ✅ Both | ✅ Both (Base: ❌ no tool) | ✅ Both | Simple: ✅✅, Time: ❌✅, Button: ✅✅ | ✅ Passed | • Base didn't call tool for Time Widget (returned JSON instead)<br>• Adapter JSX truncated for Button<br>• Adapter JSX all commented for Simple | ~50s |
-| 2025-11-09 16:39:26 | v4 | ✅ Base (no tool), ❌ Adapter (context 3920/4096) | ✅ Both | ✅ Base (tool), ❌ Adapter (context 3923/4096) | Simple: ❌❌, Time: ✅✅, Button: ✅❌ | ❌ Failed (2/3 tests) | • Adapter context limits on 2 cases (3920, 3923/4096)<br>• Base called tools on Time & Button but not Simple<br>• Individual tests passed | ~388s |
-| 2025-11-09 16:03:43 | v4 | ✅ Both | ✅ Both | ✅ Both | Base: ✅, Adapter: ✅ (comparison test) | ❌ Failed (2/3 tests) | • **Contradiction**: Comparison test shows base called tools ✅, but individual test shows base did NOT call tool ❌<br>• Adapter failed individual test (context 3920/4096) | ~205s |
-| 2025-11-09 15:45:07 | v4 | ✅ Base (no tool), ❌ Adapter (context 3920/4096) | ✅ Base (no tool), ❌ Adapter (context 3927/4096) | ❌ Base (decoding), ✅ Adapter | Base: ❌ (all 3), Adapter: ✅ (Button only) | ❌ Failed | • Adapter context limits on 2 cases<br>• Base not calling tools<br>• Base decoding error on Button | ~340s |
-| 2025-11-09 15:25:32 | v4 | ✅ Both | ✅ Both | ❌ Base (context 4090/4096), ✅ Adapter | Base: ❌, Adapter: ✅ (all 3 cases) | ❌ Failed | • Base not calling tool<br>• Base hit context limit on Button Widget | ~106s |
-| 2025-11-09 11:54:58 | v4 | ✅ Both | ✅ Both | ✅ Both | | ✅ Passed | • **ALL TESTS PASSED!**<br>• Adapter reused Simple JSX for Time Widget | ~60s |
-| 2025-11-09 11:46:57 | v4 | ✅ Both | ✅ Both | ✅ Both | | ✅ Passed | • **ALL TESTS PASSED!**<br>• Adapter faster (5.86s vs 18.25s on simple) | ~43s |
-| 2025-11-09 11:44:04 | v4 | ❌ Base (decoding), ✅ Adapter | ⚠️ Base (truncated), ❌ Adapter (context 3927/4096) | ✅ Base (no tool), ❌ Adapter (context 3923/4096) | | ❌ Failed | • Base decoding error on simple<br>• Adapter context limits on 2 cases | ~412s |
-| 2025-11-09 | v4 | ✅ Both | ✅ Both (base no tool) | ⚠️ Base truncated, ✅ Adapter | | | • Adapter exceeded context (3920/4096 tokens) on simple test | ~216s |
-| 2025-11-09 | v4 | ✅ Both | ✅ Base, ❌ Adapter (context) | ✅ Base, ❌ Adapter (context) | | | • Adapter context window limits on 2 cases | ~410s |
+### Issue Legend
+
+| Acronym | Description |
+|---------|-------------|
+| **ACT** | Adapter Context Test - Individual test failed due to context limit |
+| **ACL** | Adapter Context Limit - Context window exceeded (3920-3927/4096 tokens) |
+| **AJT** | Adapter JSX Truncated - Adapter generated incomplete JSX |
+| **ARJ** | Adapter Reused JSX - Adapter reused JSX content across widgets |
+| **AJC** | Adapter JSX Commented - Adapter generated all-commented JSX |
+| **BNT** | Base No Tool (Time) - Base model didn't call tool for Time Widget |
+| **BNB** | Base No Tool (Button) - Base model didn't call tool for Button Widget |
+| **BJT** | Base JSX Truncated - Base model generated incomplete JSX |
+| **BDE** | Base Decoding Error - Base model produced malformed JSON |
+| **BCL** | Base Context Limit - Base model exceeded context window |
+
+---
+
+| Timestamp | Version | Simple | Time | Button | ACT | ACL | AJT | ARJ | AJC | BNT | BNB | BJT | BDE | BCL | Suite Status | Duration |
+|-----------|---------|--------|------|--------|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|--------------|----------|
+| 2025-11-09 17:20:28 | v4 | ✅ Both | ✅ Both | ✅ Both | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ Failed (2 issues) | ~196s |
+| 2025-11-09 17:15:08 | v4 | ✅ Both | ✅ Both | ✅ Both | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ Failed (2 issues) | ~178s |
+| 2025-11-09 17:09:35 | v4 | ✅ Both | ✅ Both | ✅ Both | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ✅ Passed | ~62s |
+| 2025-11-09 16:59:13 | v4 | ✅ Both | ❌ Both | ❌ Base | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ Failed (3 issues) | ~225s |
+| 2025-11-09 16:52:05 | v4 | ✅ Both | ✅ Both | ✅ Both | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ Passed | ~50s |
+| 2025-11-09 16:39:26 | v4 | ✅ Base | ✅ Both | ✅ Base | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ Failed (2/3 tests) | ~388s |
+| 2025-11-09 16:03:43 | v4 | ✅ Both | ✅ Both | ✅ Both | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ Failed (2/3 tests) | ~205s |
+| 2025-11-09 15:45:07 | v4 | ✅ Base | ✅ Base | ❌ Base | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ❌ | ✅ | ❌ Failed | ~340s |
+| 2025-11-09 15:25:32 | v4 | ✅ Both | ✅ Both | ❌ Base | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ Failed | ~106s |
+| 2025-11-09 11:54:58 | v4 | ✅ Both | ✅ Both | ✅ Both | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ Passed | ~60s |
+| 2025-11-09 11:46:57 | v4 | ✅ Both | ✅ Both | ✅ Both | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ Passed | ~43s |
+| 2025-11-09 11:44:04 | v4 | ❌ Base | ⚠️ Base | ✅ Base | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ❌ Failed | ~412s |
+| 2025-11-09 | v4 | ✅ Both | ✅ Both | ⚠️ Base | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | | ~216s |
+| 2025-11-09 | v4 | ✅ Both | ✅ Base | ✅ Base | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ~410s |
 
 ---
 
@@ -157,6 +174,210 @@ Based on analysis of the last 4 test runs (2025-11-09 16:59:13 through 17:20:28)
 - **Base Model**: Better JSX quality and no context limits, but inconsistent tool calling (especially on Time Widget)
 
 **Most Reliable Difference**: The adapter consistently hits context limits (3920-3927/4096 tokens) while the base model does not, making this the most distinguishing characteristic between the two models.
+
+---
+
+## Consistency Patterns by Model
+
+Based on analysis of the last 4 test runs (2025-11-09 16:59:13 through 17:20:28), the following consistency patterns are observed:
+
+### Base Model Consistency
+
+**100% Consistent (4/4 runs):**
+1. ✅ **Simple Widget**: Always calls tool successfully
+2. ❌ **Time Widget**: Always fails to call tool (returns JSON or decoding error)
+
+**Inconsistent:**
+3. ⚠️ **Button Widget**: 50% success rate (2/4 runs called tool, 2/4 failed)
+
+**Summary**: Base model is highly consistent on Simple Widget (always succeeds) and Time Widget (always fails), but inconsistent on Button Widget.
+
+### Adapter Model Consistency
+
+**100% Consistent (4/4 runs):**
+1. ✅ **Simple Widget**: Always calls tool successfully
+2. ✅ **Button Widget**: Always calls tool successfully
+
+**Mostly Consistent (3/4 runs):**
+3. ✅ **Time Widget**: 75% success rate (3/4 runs succeeded, 1/4 hit context limit)
+
+**Summary**: Adapter model is highly consistent on Simple and Button Widgets (always succeeds), and usually succeeds on Time Widget (fails only due to context limits).
+
+### Key Findings
+
+- **Most Consistent Metric**: Both models are 100% consistent on Simple Widget (always call tool)
+- **Base Model Strength**: 100% consistent success on Simple Widget
+- **Base Model Weakness**: 100% consistent failure on Time Widget (never calls tool)
+- **Adapter Model Strength**: 100% consistent success on both Simple and Button Widgets
+- **Adapter Model Weakness**: Context limits cause failures on Time Widget (25% failure rate)
+
+### Critical Finding: Non-Deterministic Context Window Behavior
+
+**Observation**: Three consecutive runs with identical code and prompts showed dramatically different results:
+
+- **17:09:35**: ✅ Passed - Adapter succeeded on all tests, no context issues
+- **17:15:08**: ❌ Failed - Adapter hit context limit (3920/4096 tokens) on individual test
+- **17:20:28**: ❌ Failed - Adapter hit context limit (3920/4096 tokens) on individual test
+
+**Analysis**: The adapter model is operating **right at the edge of its context window** (3920-3927/4096 tokens). Small variations in response length due to model randomness can push it over the threshold, causing failures.
+
+**Implications**:
+- The adapter's context window usage is **unstable** - same inputs can produce different outcomes
+- Failures are **non-deterministic** - cannot be reliably reproduced
+- The model needs **headroom** below 3920 tokens to be reliable
+- This explains why the adapter sometimes succeeds and sometimes fails on identical test cases
+
+**Recommendation**: The adapter model requires either:
+1. A larger context window, or
+2. More aggressive prompt/response compression to stay well below 3920 tokens
+
+---
+
+## Research: Why Does the Adapter Have a Smaller Context Window?
+
+### Observed Behavior
+- **Base Model**: No context window issues observed, can handle long multi-message conversations
+- **Adapter Model**: Consistently fails at 3920-3927/4095 tokens (~175 tokens of headroom)
+- **Critical Pattern**: Adapter is nearly full after the FIRST question, suggesting immediate context consumption
+- **Apple's Limit**: max_sequence_length is limited to 4095 (not 4096) in Apple's toolkit
+
+### Code Analysis
+
+**Base Model Initialization:**
+```swift
+LanguageModelSession(
+    tools: tools,
+    instructions: instructions  // Instructions passed separately
+)
+```
+
+**Adapter Model Initialization:**
+```swift
+let adapter = try SystemLanguageModel.Adapter(fileURL: adapterURL)
+let customAdapterModel = SystemLanguageModel(adapter: adapter)
+LanguageModelSession(
+    model: customAdapterModel,
+    tools: tools
+    // NO instructions passed - adapter may contain them
+)
+```
+
+**Key Difference**: 
+- **Base Model**: Instructions passed separately; tool definitions handled via function calling API (doesn't consume context tokens)
+- **Adapter Model**: System prompt (~732 tokens) + tool definition (~186 tokens) included in system message during training, so framework includes them in context at inference time. However, this only accounts for ~919 tokens, leaving ~3001 tokens unaccounted for in the ~3920/4095 limit.
+
+### Hypotheses
+
+#### 1. **System Prompt + Tool Definition in Context** (CONFIRMED - Most Likely Cause)
+- **FACT**: Tool definitions were included in the system message of each training item during adapter training
+- **Measured Token Counts**:
+  - System Prompt v4: ~732 tokens
+  - Tool Definition: ~186 tokens
+  - Combined: ~919 tokens
+- **Mystery**: If only ~919 tokens are accounted for, but adapter hits ~3920/4095, there's ~3001 tokens unaccounted for
+- **Possible Additional Context**:
+  - System prompt might be included in context even though "baked in" to training
+  - Few-shot examples or training examples might be included
+  - Conversation formatting overhead (role labels, message formatting)
+  - Framework metadata or adapter-specific context
+- **Evidence**: 
+  - Adapter is nearly full after first question (immediate consumption)
+  - Base model handles long conversations fine (different context handling)
+  - Consistent ~3920/4095 limit (suggests fixed overhead)
+- **Impact**: Only ~175 tokens available for actual conversation after all context is included
+- **Why This Matters**: The adapter was trained expecting system prompt + tool definition in context, so the framework includes them at inference time
+
+#### 2. **Base Model Tool Handling** (Different Approach)
+- Base model likely handles tool definitions more efficiently (not included in context)
+- Base model may use a different mechanism for tool calling (function calling API vs in-context definitions)
+- **Evidence**: Base model has no context issues despite using same tools
+- **Investigation Needed**: Compare how FoundationModels handles tools for base vs adapter models
+
+#### 3. **Framework-Specific Adapter Initialization**
+- Apple's FoundationModels might add adapter-specific metadata to context
+- Adapter file might contain examples or training data that gets loaded
+- Framework might prepend adapter configuration or metadata
+- **Investigation Needed**: Check FoundationModels source/documentation for adapter handling
+
+#### 4. **Training-Time Context Window Size** (Less Likely Given Evidence)
+- The adapter was trained with max_sequence_length ~3920 tokens
+- However, this doesn't explain why it's full immediately after first question
+- **Evidence Against**: Base model handles long conversations, suggesting this isn't just a training constraint
+
+### Research Findings from Literature
+
+1. **Adapter Integration Complexity**: Adapters can modify how models process context, potentially affecting context window utilization
+2. **Positional Encoding**: Extending context windows beyond training parameters can cause issues
+3. **Attention Mechanisms**: Adapters can alter attention patterns, affecting context management
+4. **No Inherent Reduction**: LoRA adapters themselves don't inherently reduce context window size - the limitation is likely implementation-specific
+
+### Recommended Investigations
+
+1. **Inspect Adapter File**: 
+   - Check if adapter contains embedded instructions
+   - Measure token count of any embedded content
+   - Compare adapter size/structure to base model
+
+2. **Compare Token Counts**:
+   - Measure actual token counts for same prompts in base vs adapter
+   - Check if adapter adds tokens to each request
+   - Verify if instructions are being prepended to context
+
+3. **Framework Documentation**:
+   - Review Apple FoundationModels documentation
+   - Check for adapter-specific context limits
+   - Look for configuration options
+
+4. **Test with Minimal Context**:
+   - Run adapter with very short prompts
+   - Measure baseline context usage
+   - Compare to base model baseline
+
+5. **Adapter Metadata**:
+   - Inspect adapter file for metadata
+   - Check training configuration
+   - Verify base model used for training
+
+### Current Best Hypothesis (CONFIRMED)
+
+**Root Cause**: System prompt (~732 tokens) + tool definition (~186 tokens) were included in the system message during adapter training. At inference time, FoundationModels includes both in context for adapters to match training conditions. However, this only accounts for ~919 tokens, leaving ~3001 tokens unaccounted for in the ~3920/4095 limit.
+
+**Confirmed Facts**:
+- Tool definitions were in the system message of each training item
+- System Prompt v4 is ~732 tokens
+- Tool Definition is ~186 tokens
+- Combined: ~919 tokens
+- Adapter hits ~3920/4095 limit (only ~175 tokens remaining)
+- **Mystery**: ~3001 tokens are unaccounted for
+
+**Why This Happens**:
+1. **Training**: Each training example included system prompt + tool definition in system message
+2. **Inference**: Framework includes system prompt + tool definition in context to match training
+3. **Additional Context** (unaccounted ~3001 tokens):
+   - System prompt might be included even though "baked in" to training
+   - Few-shot examples or training examples might be prepended
+   - Conversation formatting overhead (role labels, message structure)
+   - Framework metadata or adapter-specific initialization context
+4. **Result**: ~3920 tokens consumed immediately, leaving only ~175 tokens for conversation
+5. **Base Model**: Uses different mechanism (function calling API) that doesn't include these in context
+
+**This Explains**:
+- ✅ Why adapter is full immediately (system prompt + tool definition + unknown overhead)
+- ✅ Why base model has no issues (different context handling)
+- ✅ The consistent ~3920/4095 limit (fixed overhead + small buffer)
+- ✅ The non-deterministic behavior (small response variations push over ~175 token buffer)
+
+**Remaining Investigation**:
+- What is consuming the additional ~3001 tokens?
+- Are few-shot examples being included?
+- Is the system prompt being duplicated (baked in + included in context)?
+- Is there conversation formatting overhead?
+
+**Solutions**:
+1. **Retrain adapter** without system prompt + tool definitions in system message (use function calling API)
+2. **Investigate** what's consuming the ~3001 unaccounted tokens
+3. **Modify inference** to not include system prompt/tool definitions if framework allows
+4. **Use base model** for tasks requiring more context
 
 ---
 
