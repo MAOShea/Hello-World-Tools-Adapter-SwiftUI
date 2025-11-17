@@ -1,0 +1,24 @@
+◇ Test run started.
+↳ Testing Library Version: 1083
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite ContextWindowUsageTests started.
+◇ Test "Test base model context window usage across multiple turns" started.
+
+📊 CONTEXT WINDOW USAGE TEST
+📊 Model: Base Model
+📊 System Prompt: systemPrompt_v4
+📊 Testing 11 turns (1 initial + 10 incremental modifications)
+📊 Context Window Limit: 4096 tokens
+📊 Using working prompt patterns: 'says' instead of 'displays', shorter directives
+================================================================================
+
+🔄 TURN 1: Initial Widget Creation
+📝 User: generate a widget that says "Hello World"
+✘ Test "Test base model context window usage across multiple turns" recorded an issue at ContextWindowUsageTests.swift:40:6: Caught error: decodingFailure(FoundationModels.LanguageModelSession.GenerationError.Context(debugDescription: "Failed to convert text into into GeneratedContent\nText: {\"jsxContent\": \"export const command = echo hello;\\nexport const refreshFrequency = 1000;\\nexport const render = ({output}) => {\\n  return <div>{output}</div>;\\n};\\nexport const className = \\\"top: 20px; left: 20px;\\\"}}}]```<executable_end>", underlyingErrors: [Swift.DecodingError.dataCorrupted(Swift.DecodingError.Context(codingPath: [], debugDescription: "The given data was not valid JSON.", underlyingError: Optional(Error Domain=NSCocoaErrorDomain Code=3840 "Unexpected end of file" UserInfo={NSDebugDescription=Unexpected end of file})))]))
+✘ Test "Test base model context window usage across multiple turns" failed after 4.164 seconds with 1 issue.
+↳ /// Test context window usage with base model across 11 turns (1 initial + 10 incremental)
+↳ /// Updated to use working prompt patterns from baseModel_MultiTurn:
+↳ /// - "says" instead of "displays" for Turn 1
+↳ /// - Shorter directives instead of explicit "update/modify the widget to..." language
+✘ Suite ContextWindowUsageTests failed after 4.164 seconds with 1 issue.
+✘ Test run with 1 test in 1 suite failed after 4.164 seconds with 1 issue.

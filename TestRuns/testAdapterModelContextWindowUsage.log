@@ -1,0 +1,160 @@
+◇ Test run started.
+↳ Testing Library Version: 1083
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite ContextWindowUsageTests started.
+◇ Test "Test adapter model context window usage across multiple turns" started.
+
+📊 CONTEXT WINDOW USAGE TEST
+📊 Model: Adapter Model
+📊 System Prompt: systemPrompt_v4
+📊 Testing 11 turns (1 initial + 10 incremental modifications)
+📊 Context Window Limit: 4096 tokens
+⚠️ NOTE: Adapter model expected to hit context window limit early
+================================================================================
+
+🔄 TURN 1: Initial Widget Creation
+📝 User: generate a widget that displays "Hello World"
+✅ Response received
+📏 Response length: 654 characters
+📏 Cumulative response length: 654 characters
+🔧 Tool called: false
+📊 Estimated tokens (rough): ~163 (using 4 chars/token estimate)
+📊 Status: ✅ Success
+
+🔄 TURN 2: Incremental Modification
+📝 User: update the widget to align it with the right edge
+✅ Response received
+📏 Response length: 806 characters
+📏 Cumulative response length: 1460 characters
+🔧 Tool called: false
+⏱️ Duration: 10.16s
+📊 Estimated total tokens: ~365 / 4096
+📊 Estimated usage: ~8%
+📊 Estimated tokens remaining: ~3731
+📊 Status: ✅ Success
+
+🔄 TURN 3: Incremental Modification
+📝 User: modify the widget to make the font bold
+✅ Response received
+📏 Response length: 868 characters
+📏 Cumulative response length: 2328 characters
+🔧 Tool called: false
+⏱️ Duration: 11.66s
+📊 Estimated total tokens: ~582 / 4096
+📊 Estimated usage: ~14%
+📊 Estimated tokens remaining: ~3514
+📊 Status: ✅ Success
+
+🔄 TURN 4: Incremental Modification
+📝 User: update the widget to make the text red
+✅ Response received
+📏 Response length: 876 characters
+📏 Cumulative response length: 3204 characters
+🔧 Tool called: false
+⏱️ Duration: 11.81s
+📊 Estimated total tokens: ~801 / 4096
+📊 Estimated usage: ~19%
+📊 Estimated tokens remaining: ~3295
+📊 Status: ✅ Success
+
+🔄 TURN 5: Incremental Modification
+📝 User: modify the widget to add a border around it
+✅ Response received
+📏 Response length: 820 characters
+📏 Cumulative response length: 4024 characters
+🔧 Tool called: false
+⏱️ Duration: 10.96s
+📊 Estimated total tokens: ~1006 / 4096
+📊 Estimated usage: ~24%
+📊 Estimated tokens remaining: ~3090
+📊 Status: ✅ Success
+
+🔄 TURN 6: Incremental Modification
+📝 User: update the widget to increase the font size to 24px
+✅ Response received
+📏 Response length: 916 characters
+📏 Cumulative response length: 4940 characters
+🔧 Tool called: false
+⏱️ Duration: 12.57s
+📊 Estimated total tokens: ~1235 / 4096
+📊 Estimated usage: ~30%
+📊 Estimated tokens remaining: ~2861
+📊 Status: ✅ Success
+
+🔄 TURN 7: Incremental Modification
+📝 User: modify the widget to center it vertically on the screen
+✅ Response received
+📏 Response length: 916 characters
+📏 Cumulative response length: 5856 characters
+🔧 Tool called: false
+⏱️ Duration: 12.65s
+📊 Estimated total tokens: ~1464 / 4096
+📊 Estimated usage: ~35%
+📊 Estimated tokens remaining: ~2632
+📊 Status: ✅ Success
+
+🔄 TURN 8: Incremental Modification
+📝 User: update the widget to add a shadow effect
+✅ Response received
+📏 Response length: 930 characters
+📏 Cumulative response length: 6786 characters
+🔧 Tool called: false
+⏱️ Duration: 14.77s
+📊 Estimated total tokens: ~1696 / 4096
+📊 Estimated usage: ~41%
+📊 Estimated tokens remaining: ~2400
+📊 Status: ✅ Success
+
+🔄 TURN 9: Incremental Modification
+📝 User: modify the widget to change the background color to light gray
+✅ Response received
+📏 Response length: 952 characters
+📏 Cumulative response length: 7738 characters
+🔧 Tool called: false
+⏱️ Duration: 15.73s
+📊 Estimated total tokens: ~1934 / 4096
+📊 Estimated usage: ~47%
+📊 Estimated tokens remaining: ~2162
+📊 Status: ✅ Success
+
+🔄 TURN 10: Incremental Modification
+📝 User: update the widget to make it semi-transparent with 80% opacity
+✅ Response received
+📏 Response length: 976 characters
+📏 Cumulative response length: 8714 characters
+🔧 Tool called: false
+⏱️ Duration: 16.10s
+📊 Estimated total tokens: ~2178 / 4096
+📊 Estimated usage: ~53%
+📊 Estimated tokens remaining: ~1918
+📊 Status: ✅ Success
+
+🔄 TURN 11: Incremental Modification
+📝 User: modify the widget to add padding of 20 pixels
+✅ Response received
+📏 Response length: 976 characters
+📏 Cumulative response length: 9690 characters
+🔧 Tool called: false
+⏱️ Duration: 16.11s
+📊 Estimated total tokens: ~2422 / 4096
+📊 Estimated usage: ~59%
+📊 Estimated tokens remaining: ~1674
+📊 Status: ✅ Success
+
+================================================================================
+📊 FINAL SUMMARY
+================================================================================
+📊 Total turns completed: 11 / 11
+📊 Total response length: 9690 characters
+📊 Total tool calls: 0
+📊 Context window errors: 0
+📊 Estimated total tokens: ~2422 / 4096
+📊 Estimated usage: ~59%
+✅ SUCCESS: All turns completed without hitting context window limit
+✅ Key Finding: Context window usage is only ~59% after 11 turns
+✅ This shows the adapter model has plenty of headroom for multi-turn conversations
+ℹ️ NOTE: No tool calls were made - model responded with text descriptions
+ℹ️ This is still valid for testing context window usage
+✔ Test "Test adapter model context window usage across multiple turns" passed after 140.349 seconds.
+✔ Suite ContextWindowUsageTests passed after 140.349 seconds.
+✔ Test run with 1 test in 1 suite passed after 140.350 seconds.

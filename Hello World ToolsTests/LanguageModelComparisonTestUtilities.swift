@@ -34,6 +34,42 @@ struct SharedTestCases {
     ]
 }
 
+// MARK: - 11-Turn Context Window Test Prompts
+
+/// Centralized definition of the 11-turn prompts used for context window testing.
+/// These are the WORKING prompts that successfully trigger tool calls.
+/// 
+/// Source of truth: Based on working patterns from `baseModel_MultiTurn`:
+/// - Turn 1: Uses "says" instead of "displays" (works better)
+/// - Turns 2-11: Uses shorter directives instead of explicit "update/modify the widget to..." language
+struct ContextWindowTestPrompts {
+    /// Turn 1: Initial widget creation prompt
+    /// EXACTLY matches the working prompt from baseModel_MultiTurn
+    static let initialPrompt = "generate a widget that says \"abc as easy as 123\""
+    
+    /// Turns 2-11: Incremental modification prompts
+    /// EXACTLY matches the working prompt from baseModel_MultiTurn (Turn 2)
+    /// Note: baseModel_MultiTurn only has 2 turns, so we use the working Turn 2 pattern
+    /// and extend it with similar shorter directives for the remaining turns
+    static let incrementalPrompts: [String] = [
+        "move it to the top-right corner",  // EXACT match from baseModel_MultiTurn Turn 2
+        "make the font bold",
+        "make the text red",
+        "add a border around it",
+        "increase the font size to 24px",
+        "center it vertically on the screen",
+        "add a shadow effect",
+        "change the background color to light gray",
+        "make it semi-transparent with 80% opacity",
+        "add padding of 20 pixels"
+    ]
+    
+    /// All 11 prompts in order (Turn 1 + Turns 2-11)
+    static var allPrompts: [String] {
+        [initialPrompt] + incrementalPrompts
+    }
+}
+
 // MARK: - Shared Test Functions
 
 struct SharedTestFunctions {

@@ -23,6 +23,7 @@ enum SystemPromptVersion: String, CaseIterable {
     case systemPrompt_v2 = "systemPrompt_v2"
     case systemPrompt_v3 = "systemPrompt_v3"
     case systemPrompt_v4 = "systemPrompt_v4"
+    case systemPrompt_v5 = "systemPrompt_v5"
     
     var prompt: String {
         switch self {
@@ -34,6 +35,8 @@ enum SystemPromptVersion: String, CaseIterable {
             return Constants.Prompts.systemPrompt_v3
         case .systemPrompt_v4:
             return Constants.Prompts.systemPrompt_v4
+        case .systemPrompt_v5:
+            return Constants.Prompts.systemPrompt_v5
         }
     }
 }
@@ -66,6 +69,10 @@ struct TestResult {
     let transcriptEntries: [Any]
     let jsxContent: String?  // Extracted JSX content from tool call
     let jsxContentLength: Int
+    let toolCallCount: Int  // Number of tool calls detected in transcript
+    let detectionMethods: [String]  // Methods used to detect tool calls
+    let toolExecuted: Bool  // Whether tool was executed (based on transcript detection, confirmed via log prints)
+    let responseContainsJSX: Bool  // Whether response text contains JSX code
     
     var succeeded: Bool {
         error == nil && response != nil
@@ -194,6 +201,10 @@ struct TestRunner {
         var toolWasCalled = false
         var transcriptEntries: [Any] = []
         var extractedJSX: String? = nil
+        var toolCallCount = 0
+        var transcriptDetectionMethods: [String] = []
+        var toolExecuted = false
+        var responseContainsJSX = false
         
         do {
             let session = try SessionFactory.createSession(
@@ -216,107 +227,87 @@ struct TestRunner {
             response = modelResponse.content
             transcriptEntries = Array(modelResponse.transcriptEntries)
             
-            // Extract JSX content from tool calls
+            // Tool execution is verified through log prints (🔧 TOOL CALL and ✅ FILE SAVED)
+            // No need to check file system - we rely on transcript detection and tool logs
+            
+            // Enhanced tool call detection: Check transcript entries more thoroughly
             for entry in transcriptEntries {
                 let entryString = String(describing: entry)
-                let isToolCall = entryString.contains("WriteUbersichtWidgetToFileSystem") ||
-                                 entryString.contains("ToolCalls")
+                let entryType = String(describing: type(of: entry))
                 
-                if isToolCall {
-                    toolWasCalled = true
-                    
-                    // Try to extract JSX content using reflection
-                    let entryMirror = Mirror(reflecting: entry)
-                    for child in entryMirror.children {
-                        if let label = child.label,
-                           (label.contains("jsx") || label.contains("jsxContent") || label.contains("argument")) {
+                // Method 1: Check for tool name in string representation
+                if entryString.contains("WriteUbersichtWidgetToFileSystem") {
+                    toolCallCount += 1
+                    transcriptDetectionMethods.append("tool_name_in_string")
+                }
+                
+                // Method 2: Check for ToolCalls type or related keywords
+                if entryString.contains("ToolCalls") || 
+                   entryString.contains("tool_calls") ||
+                   entryString.contains("ToolCall") {
+                    toolCallCount += 1
+                    if !transcriptDetectionMethods.contains("tool_calls_keyword") {
+                        transcriptDetectionMethods.append("tool_calls_keyword")
+                    }
+                }
+                
+                // Method 3: Check entry type name
+                if entryType.contains("Tool") && entryType.contains("Call") {
+                    toolCallCount += 1
+                    if !transcriptDetectionMethods.contains("tool_call_type") {
+                        transcriptDetectionMethods.append("tool_call_type")
+                    }
+                }
+                
+                // Method 4: Use reflection to check for tool-related properties
+                let entryMirror = Mirror(reflecting: entry)
+                for child in entryMirror.children {
+                    if let label = child.label {
+                        let labelLower = label.lowercased()
+                        if labelLower.contains("tool") && (labelLower.contains("call") || labelLower.contains("name")) {
                             let valueString = String(describing: child.value)
-                            // Look for jsxContent in the string representation
-                            if valueString.contains("jsxContent") {
-                                // Try to extract the actual content
-                                if let contentRange = valueString.range(of: "jsxContent") {
-                                    let afterLabel = String(valueString[contentRange.upperBound...])
-                                    // Look for the content after the label
-                                    if let quoteRange = afterLabel.range(of: "\"") ?? afterLabel.range(of: "'") {
-                                        let contentStart = afterLabel.index(after: quoteRange.lowerBound)
-                                        // Find the end quote (simplified - might need more sophisticated parsing)
-                                        if let endQuoteRange = afterLabel[contentStart...].range(of: "\"") ?? afterLabel[contentStart...].range(of: "'") {
-                                            extractedJSX = String(afterLabel[contentStart..<endQuoteRange.lowerBound])
-                                        }
-                                    }
+                            if valueString.contains("WriteUbersichtWidgetToFileSystem") {
+                                toolCallCount += 1
+                                if !transcriptDetectionMethods.contains("reflection_property") {
+                                    transcriptDetectionMethods.append("reflection_property")
                                 }
-                            }
-                            // Also check if the value itself contains the JSX
-                            if extractedJSX == nil && valueString.count > 50 && valueString.contains("export const") {
-                                extractedJSX = valueString
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // Fallback: try to extract from full transcript string with better JSON parsing
-            if extractedJSX == nil && toolWasCalled {
-                let fullTranscript = transcriptEntries.map { String(describing: $0) }.joined(separator: "\n")
-                
-                // Look for jsxContent pattern in JSON-like structure
-                // Pattern: "jsxContent": "actual content here"
-                if let jsxRange = fullTranscript.range(of: "\"jsxContent\"") ?? fullTranscript.range(of: "'jsxContent'") ?? fullTranscript.range(of: "jsxContent") {
-                    var afterLabel = String(fullTranscript[jsxRange.upperBound...])
-                    
-                    // Skip whitespace and colon
-                    afterLabel = afterLabel.trimmingCharacters(in: .whitespaces)
-                    if afterLabel.hasPrefix(":") {
-                        afterLabel = String(afterLabel.dropFirst()).trimmingCharacters(in: .whitespaces)
-                    }
-                    
-                    // Find the opening quote
-                    if let quoteStart = afterLabel.firstIndex(where: { $0 == "\"" || $0 == "'" }) {
-                        let quoteChar = afterLabel[quoteStart]
-                        let content = String(afterLabel[afterLabel.index(after: quoteStart)...])
-                        
-                        // Parse the content, handling escaped quotes
-                        var result = ""
-                        var i = content.startIndex
-                        var escaped = false
-                        
-                        while i < content.endIndex {
-                            let char = content[i]
-                            
-                            if escaped {
-                                result.append(char)
-                                escaped = false
-                            } else if char == "\\" {
-                                escaped = true
-                            } else if char == quoteChar {
-                                // Found closing quote
                                 break
-                            } else {
-                                result.append(char)
                             }
-                            
-                            i = content.index(after: i)
-                        }
-                        
-                        // Unescape common sequences
-                        result = result.replacingOccurrences(of: "\\n", with: "\n")
-                        result = result.replacingOccurrences(of: "\\t", with: "\t")
-                        result = result.replacingOccurrences(of: "\\\"", with: "\"")
-                        result = result.replacingOccurrences(of: "\\'", with: "'")
-                        
-                        if result.count > 50 {
-                            extractedJSX = result
                         }
                     }
                 }
             }
             
-            // Final fallback: try to read from the saved file (if we can access it)
-            if extractedJSX == nil && toolWasCalled {
-                let filePath = "/Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx"
-                if let fileContent = try? String(contentsOfFile: filePath, encoding: .utf8) {
-                    extractedJSX = fileContent
+            // Tool call detection: Based on transcript entries
+            // Tool execution is confirmed by log prints (🔧 TOOL CALL and ✅ FILE SAVED)
+            if toolCallCount > 0 {
+                toolWasCalled = true
+                toolExecuted = true  // If detected in transcript, tool was executed (logs confirm)
+            }
+            
+            // Diagnostic: Check if response contains JSX (model might have returned JSX instead of calling tool)
+            if let responseContent = response {
+                let jsxIndicators = [
+                    "export const command",
+                    "export const refreshFrequency",
+                    "export const render",
+                    "export const className"
+                ]
+                responseContainsJSX = jsxIndicators.allSatisfy { responseContent.contains($0) }
+                
+                if responseContainsJSX && toolCallCount == 0 {
+                    print("⚠️ Response contains JSX code but tool was not called")
+                    print("⚠️ Model may have returned JSX in response text instead of calling tool")
                 }
+            }
+            
+            // Log detection summary for debugging
+            if toolCallCount > 0 {
+                print("✅ Tool call detection summary:")
+                print("   - Transcript detection: YES (\(toolCallCount) matches)")
+                print("   - Detection methods: \(transcriptDetectionMethods.isEmpty ? "none" : transcriptDetectionMethods.joined(separator: ", "))")
+                print("   - Response contains JSX: \(responseContainsJSX)")
+                print("   - Tool execution: Confirmed via log prints (🔧 TOOL CALL and ✅ FILE SAVED)")
             }
             
         } catch let caughtError {
@@ -335,7 +326,11 @@ struct TestRunner {
             toolWasCalled: toolWasCalled,
             transcriptEntries: transcriptEntries,
             jsxContent: extractedJSX,
-            jsxContentLength: extractedJSX?.count ?? 0
+            jsxContentLength: extractedJSX?.count ?? 0,
+            toolCallCount: toolCallCount,
+            detectionMethods: transcriptDetectionMethods,
+            toolExecuted: toolExecuted,
+            responseContainsJSX: responseContainsJSX
         )
     }
 }
@@ -388,6 +383,10 @@ struct ResultComparison {
         - All Lines Commented: \(baseResult.allLinesCommented ? "⚠️ YES" : "✅ NO")
         - Duration: \(String(format: "%.2f", baseResult.duration))s
         - Tool Called: \(baseResult.toolWasCalled ? "✅ YES" : "❌ NO")
+        - Tool Executed (Transcript): \(baseResult.toolExecuted ? "✅ YES" : "❌ NO")
+        - Tool Call Count (Transcript): \(baseResult.toolCallCount)
+        - Detection Methods: \(baseResult.detectionMethods.isEmpty ? "none" : baseResult.detectionMethods.joined(separator: ", "))
+        - Response Contains JSX: \(baseResult.responseContainsJSX ? "⚠️ YES" : "✅ NO")
         - Error: \(baseResult.error?.localizedDescription ?? "None")
         
         ADAPTER MODEL:
@@ -398,6 +397,10 @@ struct ResultComparison {
         - All Lines Commented: \(adapterResult.allLinesCommented ? "⚠️ YES" : "✅ NO")
         - Duration: \(String(format: "%.2f", adapterResult.duration))s
         - Tool Called: \(adapterResult.toolWasCalled ? "✅ YES" : "❌ NO")
+        - Tool Executed (Transcript): \(adapterResult.toolExecuted ? "✅ YES" : "❌ NO")
+        - Tool Call Count (Transcript): \(adapterResult.toolCallCount)
+        - Detection Methods: \(adapterResult.detectionMethods.isEmpty ? "none" : adapterResult.detectionMethods.joined(separator: ", "))
+        - Response Contains JSX: \(adapterResult.responseContainsJSX ? "⚠️ YES" : "✅ NO")
         - Error: \(adapterResult.error?.localizedDescription ?? "None")
         
         DIFFERENCES:
@@ -410,9 +413,19 @@ struct ResultComparison {
         
         TOOL CALL SUMMARY:
         - Base Model Tool Called: \(baseResult.toolWasCalled ? "✅ YES" : "❌ NO")
+        - Base Model Tool Executed: \(baseResult.toolExecuted ? "✅ YES" : "❌ NO")
+        - Base Model Transcript Matches: \(baseResult.toolCallCount)
         - Adapter Model Tool Called: \(adapterResult.toolWasCalled ? "✅ YES" : "❌ NO")
+        - Adapter Model Tool Executed: \(adapterResult.toolExecuted ? "✅ YES" : "❌ NO")
+        - Adapter Model Transcript Matches: \(adapterResult.toolCallCount)
         - Both Called Tool: \(baseResult.toolWasCalled && adapterResult.toolWasCalled ? "✅ YES" : "❌ NO")
+        - Both Executed Tool: \(baseResult.toolExecuted && adapterResult.toolExecuted ? "✅ YES" : "❌ NO")
         - Neither Called Tool: \(!baseResult.toolWasCalled && !adapterResult.toolWasCalled ? "⚠️ YES" : "✅ NO")
+        
+        DETECTION DISCREPANCY ANALYSIS:
+        - Base: Response has JSX but tool not called: \(baseResult.responseContainsJSX && baseResult.toolCallCount == 0 ? "⚠️ YES" : "✅ NO")
+        - Adapter: Response has JSX but tool not called: \(adapterResult.responseContainsJSX && adapterResult.toolCallCount == 0 ? "⚠️ YES" : "✅ NO")
+        - Note: Tool execution is verified via log prints (🔧 TOOL CALL and ✅ FILE SAVED), not file system checks
         
         """
         

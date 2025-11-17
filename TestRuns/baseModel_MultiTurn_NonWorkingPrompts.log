@@ -1,0 +1,44 @@
+◇ Test run started.
+↳ Testing Library Version: 1083
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite LanguageModelComparisonTests_v4 started.
+◇ Test "baseModel_MultiTurn_NonWorkingPrompts" started.
+
+🔄 MULTI-TURN CONVERSATION TEST (POTENTIALLY PROBLEMATIC PROMPTS)
+🔄 Model Type: base
+🔄 System Prompt: systemPrompt_v4
+⚠️  Using prompt patterns that failed in 11-turn test: 'create' instead of 'generate', short directives
+ℹ️  NOTE: These patterns may work in 2-turn conversations but fail in longer conversations
+
+📝 TURN 1: Creating initial widget
+📝 User: create a widget that displays "Hello World"
+ℹ️  NOTE: Using 'create' instead of 'generate' - this pattern failed in 11-turn test but may work here
+📥 Assistant: ```json
+{"jsxContent": "export const command = echo hello; export const refreshFrequency = 1000; export const render = ({output}) => { return <div>{output}</div>; }; export const className = 'top: 20p...
+📊 Tool called in transcript: false
+⚠️  WARNING: Tool was NOT called - this demonstrates the impact of prompt terminology
+⚠️  Compare with baseModel_MultiTurn which uses 'generate' and successfully calls the tool
+
+📝 TURN 2: Follow-up instruction
+📝 User: align it with the right edge
+ℹ️  NOTE: Using short directive without 'update the widget to...' - this pattern failed in 11-turn test but may work here
+📥 Assistant: ```json
+{"jsxContent": "export const command = echo hello; export const refreshFrequency = 1000; export const render = ({output}) => { return <div>{output}</div>; }; export const className = 'top: 20p...
+
+📊 ANALYSIS:
+📊 First turn tool called: false
+📊 Second turn tool called: false
+
+================================================================================
+📊 TEST SUMMARY (POTENTIALLY PROBLEMATIC PROMPTS)
+================================================================================
+📊 Tool was called: 0 times (turn 1: ❌, turn 2: ❌)
+📊 Tool execution: Verified via log prints (🔧 TOOL CALL and ✅ FILE SAVED)
+
+⚠️  KEY FINDING: No tool calls were made with these prompt patterns
+⚠️  This demonstrates that prompt terminology significantly affects tool calling behavior
+⚠️  Compare with baseModel_MultiTurn which uses 'generate' and 'update the widget to...'
+================================================================================
+✔ Test "baseModel_MultiTurn_NonWorkingPrompts" passed after 5.014 seconds.
+✔ Suite LanguageModelComparisonTests_v4 passed after 5.015 seconds.
+✔ Test run with 1 test in 1 suite passed after 5.015 seconds.

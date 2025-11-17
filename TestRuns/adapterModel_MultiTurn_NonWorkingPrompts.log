@@ -1,0 +1,64 @@
+◇ Test run started.
+↳ Testing Library Version: 1083
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite LanguageModelComparisonTests_v4 started.
+◇ Test "adapterModel_MultiTurn_NonWorkingPrompts" started.
+
+🔄 MULTI-TURN CONVERSATION TEST (POTENTIALLY PROBLEMATIC PROMPTS)
+🔄 Model Type: adapter(file:///Users/mike/Downloads/uebersicht_widgets.fmadapter)
+🔄 System Prompt: systemPrompt_v4
+⚠️  Using prompt patterns that failed in 11-turn test: 'create' instead of 'generate', short directives
+ℹ️  NOTE: These patterns may work in 2-turn conversations but fail in longer conversations
+
+📝 TURN 1: Creating initial widget
+📝 User: create a widget that displays "Hello World"
+ℹ️  NOTE: Using 'create' instead of 'generate' - this pattern failed in 11-turn test but may work here
+🔧 TOOL CALL #0F6A2D59 - WriteUbersichtWidgetToFileSystem
+   📄 JSX Content: 299 characters
+   📝 JSX Content Preview:
+   import { command, refreshFrequency, render, className } from 'uebersicht';
+   
+   export const command = () => console.log('Hello World');
+   export const refreshFrequency = 1000;
+   export const render = ({ element }) => {
+     element.innerText = 'Hello World!';
+   };
+   export const className = 'uebersicht-widget';
+   
+   🔍 JSX Content Raw (showing all characters):
+   "import { command, refreshFrequency, render, className } from \'uebersicht\';\n\nexport const command = () => console.log(\'Hello World\');\nexport const refreshFrequency = 1000;\nexport const render = ({ element }) => {\n  element.innerText = \'Hello World!\';\n};\nexport const className = \'uebersicht-widget\';\n"
+📁 DIRECTORY CREATED #0F6A2D59: /Users/mike/Library/Application Support/Übersicht/widgets/hwta
+💾 SAVING FILE #0F6A2D59 to: /Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx
+✅ FILE SAVED #0F6A2D59 successfully
+📥 Assistant: The widget script has been saved to: /Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx
+
+You can now open this file in your Übersicht widget editor to configure and run the widge...
+📊 Tool called in transcript: true
+ℹ️  NOTE: Tool WAS called in this 2-turn test, but this pattern failed in the 11-turn test
+ℹ️  This suggests the failure is cumulative - patterns may work initially but fail in longer conversations
+
+📝 TURN 2: Follow-up instruction
+📝 User: align it with the right edge
+ℹ️  NOTE: Using short directive without 'update the widget to...' - this pattern failed in 11-turn test but may work here
+📥 Assistant: // Update the widget configuration to align it with the right edge
+
+export const className = 'uebersicht-widget';
+export const command = () => console.log('Hello World');
+export const refreshFrequency...
+
+📊 ANALYSIS:
+📊 First turn tool called: true
+📊 Second turn tool called: false
+
+================================================================================
+📊 TEST SUMMARY (POTENTIALLY PROBLEMATIC PROMPTS)
+================================================================================
+📊 Tool was called: 1 times (turn 1: ✅, turn 2: ❌)
+📊 Tool execution: Verified via log prints (🔧 TOOL CALL and ✅ FILE SAVED)
+
+⚠️  PARTIAL SUCCESS: Only 1 tool call(s) made
+⚠️  This demonstrates inconsistent behavior with these prompt patterns
+================================================================================
+✔ Test "adapterModel_MultiTurn_NonWorkingPrompts" passed after 21.608 seconds.
+✔ Suite LanguageModelComparisonTests_v4 passed after 21.608 seconds.
+✔ Test run with 1 test in 1 suite passed after 21.609 seconds.

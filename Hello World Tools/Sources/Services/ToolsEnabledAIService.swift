@@ -28,11 +28,12 @@ public final class ToolsEnabledAIService: AIServiceProtocol, @unchecked Sendable
                 // The absolute path to your adapter.
                 let localURL = URL(filePath: "/Users/mike/Downloads/uebersicht_widgets.fmadapter")
                 
-                // An instance of the the system language model using your adapter.
+                // My adapter.
                 let adapter = try SystemLanguageModel.Adapter(fileURL: localURL)
                 
-                // An instance of the the system language model using your adapter.
+                // An instance of the the system language model using my adapter.
                 let customAdapterModel = SystemLanguageModel(adapter: adapter)
+                
                 session = LanguageModelSession(
                     model: customAdapterModel,
                     tools: [WriteUbersichtWidgetToFileSystem(),

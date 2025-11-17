@@ -1,0 +1,108 @@
+◇ Test run started.
+↳ Testing Library Version: 1083
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite LanguageModelComparisonTests_v4 started.
+◇ Test "adapterModel_DiagnosticInspectTranscriptEntries" started.
+
+🔬 DIAGNOSTIC: TRANSCRIPT ENTRIES INSPECTION - ADAPTER MODEL
+🔬 Investigating why adapter model context window grows to ~3732 tokens on turn 2
+================================================================================
+
+================================================================================
+🔬 TESTING: Adapter Model
+================================================================================
+
+🔬 SESSION _TRANSCRIPT INSPECTION (BEFORE TURN 1 - BASELINE):
+🔬   _transcript size: 38 characters (~9 tokens)
+🔬   _transcript preview (first 500 chars):
+🔬   Transcript(entries: [(Instructions) ])
+
+================================================================================
+🔄 TURN 1
+================================================================================
+
+📝 TURN 1: Creating initial widget
+📝 User: generate a widget that says "abc as easy as 123"
+🔧 TOOL CALL #EB42B3AD - WriteUbersichtWidgetToFileSystem
+   📄 JSX Content: 268 characters
+   📝 JSX Content Preview:
+   import { command, refreshFrequency, render, className } from 'uebersicht';
+   
+   export const command = () => { return 'abc as easy as 123'; }
+   
+   export const refreshFrequency = 1000 * 60 * 60 * 24; // refresh every 1 day
+   
+   export const render = ({ command }) => `
+   <div class=
+   🔍 JSX Content Raw (showing all characters):
+   "import { command, refreshFrequency, render, className } from \'uebersicht\';\n\nexport const command = () => { return \'abc as easy as 123\'; }\n\nexport const refreshFrequency = 1000 * 60 * 60 * 24; // refresh every 1 day\n\nexport const render = ({ command }) => `\n<div class="
+📁 DIRECTORY CREATED #EB42B3AD: /Users/mike/Library/Application Support/Übersicht/widgets/hwta
+💾 SAVING FILE #EB42B3AD to: /Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx
+✅ FILE SAVED #EB42B3AD successfully
+
+📋 TURN 1 TRANSCRIPT ANALYSIS:
+📋 Total transcript entries: 3
+
+📋 Entry #0:
+📋   Type: Entry
+📋   String representation length: 339 characters
+📋   ⚠️ THIS IS A TOOL CALL ENTRY
+📋   Entry properties:
+📋     - toolCalls: 339 characters
+
+📋 Entry #1:
+📋   Type: Entry
+📋   String representation length: 146 characters
+📋   ⚠️ THIS IS A TOOL CALL ENTRY
+📋   Entry properties:
+📋     - toolOutput: 146 characters
+
+📋 Entry #2:
+📋   Type: Entry
+📋   String representation length: 122 characters
+📋   Preview: (Response) The widget script has been saved to `/Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx`.
+
+📊 TURN 1 SUMMARY:
+📊 Total transcript size: 607 characters (~151 tokens)
+📊 Tool call entry size: 485 characters (~121 tokens)
+📊 JSX/Argument content found: ❌ NO
+
+🔬 SESSION _TRANSCRIPT INSPECTION (BEFORE TURN 2):
+🔬   _transcript size: 733 characters (~183 tokens)
+🔬   _transcript preview (first 1000 chars):
+🔬   Transcript(entries: [(Instructions) , (Prompt) generate a widget that says "abc as easy as 123"
+Response Format: <nil>, (ToolCalls) WriteUbersichtWidgetToFileSystem: {"jsxContent": "import { command, refreshFrequency, render, className } from 'uebersicht';\n\nexport const command = () => { return 'abc as easy as 123'; }\n\nexport const refreshFrequency = 1000 * 60 * 60 * 24; // refresh every 1 day\n\nexport const render = ({ command }) => `\n<div class="}, (ToolOutput WriteUbersichtWidgetToFileSystem) Widget JSX script saved to: /Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx, (Response) The widget script has been saved to `/Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx`.])
+🔬   ⚠️ FOUND 'jsxContent' in _transcript!
+🔬   ⚠️   Occurrences: 1
+
+================================================================================
+🔄 TURN 2
+================================================================================
+
+📝 TURN 2: Follow-up instruction
+📝 User: move it to the top-right corner
+
+📋 TURN 2 TRANSCRIPT ANALYSIS:
+📋 Total transcript entries: 1
+
+📊 TURN 2 SUMMARY:
+📊 Total transcript size: 888 characters (~222 tokens)
+📊 Tool call entry size: 0 characters (~0 tokens)
+📊 JSX/Argument content size: 0 characters (~0 tokens)
+
+📊 GROWTH ANALYSIS:
+📊 Transcript size growth: 281 characters (~70 tokens)
+📊 This represents what was ADDED to conversation history between turn 1 and turn 2
+
+🔬 SESSION _TRANSCRIPT INSPECTION (AFTER TURN 2):
+🔬   _transcript size: 1688 characters (~422 tokens)
+🔬   Growth from turn 1 to turn 2: 955 characters (~238 tokens)
+🔬   ⚠️ FOUND 'jsxContent' in _transcript!
+🔬   ⚠️   Occurrences: 1
+
+================================================================================
+🔬 DIAGNOSTIC COMPLETE
+================================================================================
+✔ Test "adapterModel_DiagnosticInspectTranscriptEntries" passed after 17.150 seconds.
+✔ Suite LanguageModelComparisonTests_v4 passed after 17.151 seconds.
+✔ Test run with 1 test in 1 suite passed after 17.151 seconds.

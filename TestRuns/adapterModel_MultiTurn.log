@@ -1,0 +1,51 @@
+◇ Test run started.
+↳ Testing Library Version: 1083
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite LanguageModelComparisonTests_v4 started.
+◇ Test "adapterModel_MultiTurn" started.
+
+🔄 MULTI-TURN CONVERSATION TEST
+🔄 Model Type: adapter(file:///Users/mike/Downloads/uebersicht_widgets.fmadapter)
+🔄 System Prompt: systemPrompt_v4
+
+📝 TURN 1: Creating initial widget
+📝 User: generate a widget that says "abc as easy as 123"
+🔧 TOOL CALL #259A8CB0 - WriteUbersichtWidgetToFileSystem
+   📄 JSX Content: 192 characters
+   📝 JSX Content Preview:
+   export const command = 'abc as easy as 123'; export const refreshFrequency = 1000; export const render = () => { return <div>abc as easy as 123</div>; } export const className = 'easy-widget';
+   🔍 JSX Content Raw (showing all characters):
+   "export const command = \'abc as easy as 123\'; export const refreshFrequency = 1000; export const render = () => { return <div>abc as easy as 123</div>; } export const className = \'easy-widget\';"
+📁 DIRECTORY CREATED #259A8CB0: /Users/mike/Library/Application Support/Übersicht/widgets/hwta
+💾 SAVING FILE #259A8CB0 to: /Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx
+✅ FILE SAVED #259A8CB0 successfully
+📥 Assistant: The widget script has been saved to: /Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx. You can now open this file in your Übersicht widget editor to configure and run your widg...
+📊 Tool called in transcript: true
+
+📝 TURN 2: Follow-up instruction
+📝 User: move it to the top-right corner
+📥 Assistant: // widget.jsx
+export const command = 'abc as easy as 123';
+export const refreshFrequency = 1000;
+export const render = () => {
+  return (
+    <div>
+      abc as easy as 123
+    </div>
+  );
+};
+export c...
+
+📊 ANALYSIS:
+📊 First turn tool called: true
+📊 Second turn tool called: false
+
+================================================================================
+📊 TEST SUMMARY
+================================================================================
+📊 Tool was called: 1 times (turn 1: ✅, turn 2: ❌)
+📊 Tool execution: Verified via log prints (🔧 TOOL CALL and ✅ FILE SAVED)
+================================================================================
+✔ Test "adapterModel_MultiTurn" passed after 29.202 seconds.
+✔ Suite LanguageModelComparisonTests_v4 passed after 29.203 seconds.
+✔ Test run with 1 test in 1 suite passed after 29.203 seconds.

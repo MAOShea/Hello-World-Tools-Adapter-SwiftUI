@@ -1,0 +1,142 @@
+◇ Test run started.
+↳ Testing Library Version: 1083
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite LanguageModelComparisonTests_v4 started.
+◇ Test "baseModel_DiagnosticInspectTranscriptEntries" started.
+
+🔬 DIAGNOSTIC: TRANSCRIPT ENTRIES INSPECTION - BASE MODEL
+🔬 Investigating base model context window usage
+================================================================================
+
+================================================================================
+🔬 TESTING: Base Model
+================================================================================
+
+🔬 SESSION _TRANSCRIPT INSPECTION (BEFORE TURN 1 - BASELINE):
+🔬   _transcript size: 2965 characters (~741 tokens)
+🔬   _transcript preview (first 500 chars):
+🔬   Transcript(entries: [(Instructions) A conversation between a user and a helpful assistant. You are an Übersicht widget designer. Create Übersicht widgets when requested by the user.
+
+IMPORTANT: You have access to a tool called WriteUbersichtWidgetToFileSystem. You MUST call this tool whenever:
+- Creating a new widget
+- Modifying or updating an existing widget
+- Making any changes to widget code requested by the user
+
+### Tool Usage:
+Call WriteUbersichtWidgetToFileSystem with complete JSX code th...
+
+================================================================================
+🔄 TURN 1
+================================================================================
+
+📝 TURN 1: Creating initial widget
+📝 User: generate a widget that says "abc as easy as 123"
+🔧 TOOL CALL #589B6B30 - WriteUbersichtWidgetToFileSystem
+   📄 JSX Content: 269 characters
+   📝 JSX Content Preview:
+   export const command = ''; 
+   export const refreshFrequency = 1000; 
+   export const render = ({output}) => { 
+     return <div className={className}>{output}</div>; 
+   }; 
+   export const className = 'text-align: center; padding: 20px; border: 1px solid #ccc; border-radius: 5px;';
+   🔍 JSX Content Raw (showing all characters):
+   "export const command = \'\'; \nexport const refreshFrequency = 1000; \nexport const render = ({output}) => { \n  return <div className={className}>{output}</div>; \n}; \nexport const className = \'text-align: center; padding: 20px; border: 1px solid #ccc; border-radius: 5px;\';"
+📁 DIRECTORY CREATED #589B6B30: /Users/mike/Library/Application Support/Übersicht/widgets/hwta
+💾 SAVING FILE #589B6B30 to: /Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx
+✅ FILE SAVED #589B6B30 successfully
+
+📋 TURN 1 TRANSCRIPT ANALYSIS:
+📋 Total transcript entries: 3
+
+📋 Entry #0:
+📋   Type: Entry
+📋   String representation length: 338 characters
+📋   ⚠️ THIS IS A TOOL CALL ENTRY
+📋   Entry properties:
+📋     - toolCalls: 338 characters
+
+📋 Entry #1:
+📋   Type: Entry
+📋   String representation length: 146 characters
+📋   ⚠️ THIS IS A TOOL CALL ENTRY
+📋   Entry properties:
+📋     - toolOutput: 146 characters
+
+📋 Entry #2:
+📋   Type: Entry
+📋   String representation length: 81 characters
+📋   Preview: (Response) The widget has been successfully created and saved to the file system.
+
+📊 TURN 1 SUMMARY:
+📊 Total transcript size: 565 characters (~141 tokens)
+📊 Tool call entry size: 484 characters (~121 tokens)
+📊 JSX/Argument content found: ❌ NO
+
+🔬 SESSION _TRANSCRIPT INSPECTION (BEFORE TURN 2):
+🔬   _transcript size: 3618 characters (~904 tokens)
+🔬   _transcript preview (first 1000 chars):
+🔬   Transcript(entries: [(Instructions) A conversation between a user and a helpful assistant. You are an Übersicht widget designer. Create Übersicht widgets when requested by the user.
+
+IMPORTANT: You have access to a tool called WriteUbersichtWidgetToFileSystem. You MUST call this tool whenever:
+- Creating a new widget
+- Modifying or updating an existing widget
+- Making any changes to widget code requested by the user
+
+### Tool Usage:
+Call WriteUbersichtWidgetToFileSystem with complete JSX code that implements the Übersicht Widget API. 
+- For new widgets: Generate custom JSX based on the user's specific request
+- For modifications: Generate the updated/complete widget code incorporating the requested changes
+Always provide the complete, final widget code - do not copy the example below.
+
+### Übersicht Widget API:
+Übersicht widgets should export at least one of these properties (all are optional, but most widgets use them):
+- export const command: The bash command to execute (string or fu...
+🔬   ⚠️ FOUND 'jsxContent' in _transcript!
+🔬   ⚠️   Occurrences: 2
+
+================================================================================
+🔄 TURN 2
+================================================================================
+
+📝 TURN 2: Follow-up instruction
+📝 User: move it to the top-right corner
+🔧 TOOL CALL #9FC4E005 - WriteUbersichtWidgetToFileSystem
+   📄 JSX Content: 292 characters
+   📝 JSX Content Preview:
+   export const command = ''; 
+   export const refreshFrequency = 1000; 
+   export const render = ({output}) => { 
+     return <div className={className}>{output}</div>; 
+   }; 
+   export const className = 'top: 20px; left: 20px; text-align: center; padding: 20px; border: 1px solid #ccc; border-radius: 5px;';
+   🔍 JSX Content Raw (showing all characters):
+   "export const command = \'\'; \nexport const refreshFrequency = 1000; \nexport const render = ({output}) => { \n  return <div className={className}>{output}</div>; \n}; \nexport const className = \'top: 20px; left: 20px; text-align: center; padding: 20px; border: 1px solid #ccc; border-radius: 5px;\';"
+📁 DIRECTORY CREATED #9FC4E005: /Users/mike/Library/Application Support/Übersicht/widgets/hwta
+💾 SAVING FILE #9FC4E005 to: /Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx
+✅ FILE SAVED #9FC4E005 successfully
+
+📋 TURN 2 TRANSCRIPT ANALYSIS:
+📋 Total transcript entries: 3
+
+📊 TURN 2 SUMMARY:
+📊 Total transcript size: 588 characters (~147 tokens)
+📊 Tool call entry size: 507 characters (~126 tokens)
+📊 JSX/Argument content size: 0 characters (~0 tokens)
+
+📊 GROWTH ANALYSIS:
+📊 Transcript size growth: 23 characters (~5 tokens)
+📊 This represents what was ADDED to conversation history between turn 1 and turn 2
+
+🔬 SESSION _TRANSCRIPT INSPECTION (AFTER TURN 2):
+🔬   _transcript size: 4277 characters (~1069 tokens)
+🔬   Growth from turn 1 to turn 2: 659 characters (~164 tokens)
+🔬   ⚠️ FOUND 'jsxContent' in _transcript!
+🔬   ⚠️   Occurrences: 3
+
+================================================================================
+🔬 DIAGNOSTIC COMPLETE
+================================================================================
+✔ Test "baseModel_DiagnosticInspectTranscriptEntries" passed after 9.693 seconds.
+✔ Suite LanguageModelComparisonTests_v4 passed after 9.693 seconds.
+✔ Test run with 1 test in 1 suite passed after 9.693 seconds.
