@@ -806,6 +806,115 @@ struct LanguageModelComparisonTests_v4 {
         }
     }
     
+    /// Helper function to extract and log tool call details in the same format as the tool itself
+    private func logToolCallDetails(from transcriptEntries: [Any], turnNumber: Int) {
+        for entry in transcriptEntries {
+            let entryString = String(describing: entry)
+            
+            // Check if this is a tool call entry
+            let isToolCall = entryString.contains("WriteUbersichtWidgetToFileSystem") ||
+                             entryString.contains("ToolCalls")
+            
+            if isToolCall {
+                // Generate a call ID from entry hash or use a simple counter
+                let callId = String(abs(entryString.hashValue), radix: 16).uppercased().prefix(8)
+                let finalCallId = callId.count >= 8 ? String(callId.prefix(8)) : String(repeating: "0", count: 8 - callId.count) + callId
+                
+                Swift.print("🔧 TOOL CALL #\(finalCallId) - WriteUbersichtWidgetToFileSystem")
+                
+                // Try to extract JSX content from the entry string itself (most reliable method)
+                var jsxContent: String? = nil
+                
+                // Method 1: Look for JSON pattern in entry string: "jsxContent": "..."
+                // Handle escaped quotes and newlines in JSON
+                if let jsxStart = entryString.range(of: "\"jsxContent\"\\s*:\\s*\"", options: .regularExpression) {
+                    let afterStart = String(entryString[jsxStart.upperBound...])
+                    // Find the closing quote, handling escaped quotes
+                    var jsxEndIndex: String.Index? = nil
+                    var i = afterStart.startIndex
+                    var escaped = false
+                    while i < afterStart.endIndex {
+                        let char = afterStart[i]
+                        if escaped {
+                            escaped = false
+                        } else if char == "\\" {
+                            escaped = true
+                        } else if char == "\"" {
+                            jsxEndIndex = i
+                            break
+                        }
+                        i = afterStart.index(after: i)
+                    }
+                    
+                    if let endIndex = jsxEndIndex {
+                        jsxContent = String(afterStart[..<endIndex])
+                        // Unescape the string
+                        jsxContent = jsxContent?.replacingOccurrences(of: "\\n", with: "\n")
+                            .replacingOccurrences(of: "\\\"", with: "\"")
+                            .replacingOccurrences(of: "\\\\", with: "\\")
+                    }
+                }
+                
+                // Method 2: If not found, try using reflection to inspect entry properties
+                if jsxContent == nil {
+                    let entryMirror = Mirror(reflecting: entry)
+                    for child in entryMirror.children {
+                        if let label = child.label {
+                            let valueString = String(describing: child.value)
+                            
+                            // Look for jsxContent in property values
+                            if (label.contains("argument") || label.contains("Argument") || 
+                                label.contains("jsx") || label.contains("jsxContent")) &&
+                               valueString.contains("jsxContent") {
+                                
+                                // Try to extract from JSON string
+                                if let jsxStart = valueString.range(of: "\"jsxContent\"\\s*:\\s*\"", options: .regularExpression) {
+                                    let afterStart = String(valueString[jsxStart.upperBound...])
+                                    if let quoteEnd = afterStart.range(of: "\"") {
+                                        jsxContent = String(afterStart[..<quoteEnd.lowerBound])
+                                        // Unescape
+                                        jsxContent = jsxContent?.replacingOccurrences(of: "\\n", with: "\n")
+                                            .replacingOccurrences(of: "\\\"", with: "\"")
+                                            .replacingOccurrences(of: "\\\\", with: "\\")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Display JSX content in the same format as the tool
+                if let jsx = jsxContent, !jsx.isEmpty {
+                    Swift.print("   📄 JSX Content: \(jsx.count) characters")
+                    Swift.print("   📝 JSX Content Preview:")
+                    Swift.print("   " + jsx.replacingOccurrences(of: "\n", with: "\n   "))
+                    Swift.print("   🔍 JSX Content Raw (showing all characters):")
+                    Swift.print("   " + jsx.debugDescription)
+                } else {
+                    // JSX not directly extractable - this is expected for base model which stores compact references
+                    Swift.print("   📄 JSX Content: Not directly extractable from transcript entry")
+                    Swift.print("   ⚠️ Note: Tool call entry stores compact reference (base model behavior)")
+                }
+                
+                // Check for tool output entries (file save confirmation)
+                for outputEntry in transcriptEntries {
+                    let outputStr = String(describing: outputEntry)
+                    if outputStr.contains("saved to:") || outputStr.contains("Widget JSX script saved") {
+                        // Extract file path if available
+                        if let pathRange = outputStr.range(of: "/Users/[^\\s]+\\.jsx", options: .regularExpression) {
+                            let filePath = String(outputStr[pathRange])
+                            let directory = String(filePath.dropLast("/index.jsx".count))
+                            Swift.print("📁 DIRECTORY CREATED #\(finalCallId): \(directory)")
+                            Swift.print("💾 SAVING FILE #\(finalCallId) to: \(filePath)")
+                        }
+                        Swift.print("✅ FILE SAVED #\(finalCallId) successfully")
+                        break
+                    }
+                }
+            }
+        }
+    }
+    
     /// Helper function to run diagnostic for a single model
     private func runDiagnosticForModel(modelName: String, modelType: ModelType) async throws {
         Swift.print("\n" + String(repeating: "=", count: 80))
@@ -857,6 +966,9 @@ struct LanguageModelComparisonTests_v4 {
             let response = try await session.respond(to: firstPrompt)
             let firstTranscript = Array(response.transcriptEntries)
             
+            // Extract and log tool call details in the same format as the tool itself
+            logToolCallDetails(from: firstTranscript, turnNumber: 1)
+            
             Swift.print("\n📋 TURN 1 TRANSCRIPT ANALYSIS:")
             Swift.print("📋 Total transcript entries: \(firstTranscript.count)")
             
@@ -877,6 +989,11 @@ struct LanguageModelComparisonTests_v4 {
                     Swift.print("📋   ⚠️ THIS IS A TOOL CALL ENTRY")
                     toolCallEntrySize += entrySize
                     
+                    // Show the full entry string representation
+                    let entryPreview = entryString.count > 500 ? String(entryString.prefix(500)) + "..." : entryString
+                    Swift.print("📋   Full entry string representation:")
+                    Swift.print("📋     \(entryPreview)")
+                    
                     // Inspect entry properties using reflection
                     let entryMirror = Mirror(reflecting: entry)
                     Swift.print("📋   Entry properties:")
@@ -886,6 +1003,11 @@ struct LanguageModelComparisonTests_v4 {
                             let valueSize = valueString.count
                             
                             Swift.print("📋     - \(label): \(valueSize) characters")
+                            // Show actual content for tool call entries
+                            if isToolCall {
+                                let preview = valueString.count > 500 ? String(valueString.prefix(500)) + "..." : valueString
+                                Swift.print("📋       Content: \(preview)")
+                            }
                             
                             // Check for jsxContent or arguments
                             if label.contains("argument") || label.contains("Argument") || 
@@ -995,6 +1117,9 @@ struct LanguageModelComparisonTests_v4 {
         do {
             let secondResponse = try await session.respond(to: secondPrompt)
             let secondTranscript = Array(secondResponse.transcriptEntries)
+            
+            // Extract and log tool call details in the same format as the tool itself
+            logToolCallDetails(from: secondTranscript, turnNumber: 2)
             
             Swift.print("\n📋 TURN 2 TRANSCRIPT ANALYSIS:")
             Swift.print("📋 Total transcript entries: \(secondTranscript.count)")

@@ -23,32 +23,36 @@
 
 📝 TURN 1: Creating initial widget
 📝 User: generate a widget that says "abc as easy as 123"
-🔧 TOOL CALL #EB42B3AD - WriteUbersichtWidgetToFileSystem
-   📄 JSX Content: 268 characters
+🔧 TOOL CALL #3DE64D29 - WriteUbersichtWidgetToFileSystem
+   📄 JSX Content: 104 characters
    📝 JSX Content Preview:
-   import { command, refreshFrequency, render, className } from 'uebersicht';
-   
-   export const command = () => { return 'abc as easy as 123'; }
-   
-   export const refreshFrequency = 1000 * 60 * 60 * 24; // refresh every 1 day
-   
-   export const render = ({ command }) => `
-   <div class=
+   import { command, refreshFrequency, render, className } from 'uebersicht'; export const command = 'echo 
    🔍 JSX Content Raw (showing all characters):
-   "import { command, refreshFrequency, render, className } from \'uebersicht\';\n\nexport const command = () => { return \'abc as easy as 123\'; }\n\nexport const refreshFrequency = 1000 * 60 * 60 * 24; // refresh every 1 day\n\nexport const render = ({ command }) => `\n<div class="
-📁 DIRECTORY CREATED #EB42B3AD: /Users/mike/Library/Application Support/Übersicht/widgets/hwta
-💾 SAVING FILE #EB42B3AD to: /Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx
-✅ FILE SAVED #EB42B3AD successfully
+   "import { command, refreshFrequency, render, className } from \'uebersicht\'; export const command = \'echo "
+📁 DIRECTORY CREATED #3DE64D29: /Users/mike/Library/Application Support/Übersicht/widgets/hwta
+💾 SAVING FILE #3DE64D29 to: /Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx
+✅ FILE SAVED #3DE64D29 successfully
+🔧 TOOL CALL #13F1A438 - WriteUbersichtWidgetToFileSystem
+   📄 JSX Content: 104 characters
+   📝 JSX Content Preview:
+   import { command, refreshFrequency, render, className } from 'uebersicht'; export const command = 'echo 
+   🔍 JSX Content Raw (showing all characters):
+   "import { command, refreshFrequency, render, className } from \'uebersicht\'; export const command = \'echo "
+✅ FILE SAVED #13F1A438 successfully
+🔧 TOOL CALL #7F19680B - WriteUbersichtWidgetToFileSystem
+   📄 JSX Content: Not directly extractable from transcript entry
+   ⚠️ Note: Tool call entry stores compact reference (base model behavior)
+✅ FILE SAVED #7F19680B successfully
 
 📋 TURN 1 TRANSCRIPT ANALYSIS:
 📋 Total transcript entries: 3
 
 📋 Entry #0:
 📋   Type: Entry
-📋   String representation length: 339 characters
+📋   String representation length: 168 characters
 📋   ⚠️ THIS IS A TOOL CALL ENTRY
 📋   Entry properties:
-📋     - toolCalls: 339 characters
+📋     - toolCalls: 168 characters
 
 📋 Entry #1:
 📋   Type: Entry
@@ -59,19 +63,19 @@
 
 📋 Entry #2:
 📋   Type: Entry
-📋   String representation length: 122 characters
-📋   Preview: (Response) The widget script has been saved to `/Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx`.
+📋   String representation length: 226 characters
+📋   Preview: (Response) Your widget has been created and saved to the following location: /Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx. You should now be able to open the Übersicht app ...
 
 📊 TURN 1 SUMMARY:
-📊 Total transcript size: 607 characters (~151 tokens)
-📊 Tool call entry size: 485 characters (~121 tokens)
+📊 Total transcript size: 540 characters (~135 tokens)
+📊 Tool call entry size: 314 characters (~78 tokens)
 📊 JSX/Argument content found: ❌ NO
 
 🔬 SESSION _TRANSCRIPT INSPECTION (BEFORE TURN 2):
-🔬   _transcript size: 733 characters (~183 tokens)
+🔬   _transcript size: 666 characters (~166 tokens)
 🔬   _transcript preview (first 1000 chars):
 🔬   Transcript(entries: [(Instructions) , (Prompt) generate a widget that says "abc as easy as 123"
-Response Format: <nil>, (ToolCalls) WriteUbersichtWidgetToFileSystem: {"jsxContent": "import { command, refreshFrequency, render, className } from 'uebersicht';\n\nexport const command = () => { return 'abc as easy as 123'; }\n\nexport const refreshFrequency = 1000 * 60 * 60 * 24; // refresh every 1 day\n\nexport const render = ({ command }) => `\n<div class="}, (ToolOutput WriteUbersichtWidgetToFileSystem) Widget JSX script saved to: /Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx, (Response) The widget script has been saved to `/Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx`.])
+Response Format: <nil>, (ToolCalls) WriteUbersichtWidgetToFileSystem: {"jsxContent": "import { command, refreshFrequency, render, className } from 'uebersicht'; export const command = 'echo "}, (ToolOutput WriteUbersichtWidgetToFileSystem) Widget JSX script saved to: /Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx, (Response) Your widget has been created and saved to the following location: /Users/mike/Library/Application Support/Übersicht/widgets/hwta/index.jsx. You should now be able to open the Übersicht app and find the widget there.])
 🔬   ⚠️ FOUND 'jsxContent' in _transcript!
 🔬   ⚠️   Occurrences: 1
 
@@ -81,28 +85,3 @@ Response Format: <nil>, (ToolCalls) WriteUbersichtWidgetToFileSystem: {"jsxConte
 
 📝 TURN 2: Follow-up instruction
 📝 User: move it to the top-right corner
-
-📋 TURN 2 TRANSCRIPT ANALYSIS:
-📋 Total transcript entries: 1
-
-📊 TURN 2 SUMMARY:
-📊 Total transcript size: 888 characters (~222 tokens)
-📊 Tool call entry size: 0 characters (~0 tokens)
-📊 JSX/Argument content size: 0 characters (~0 tokens)
-
-📊 GROWTH ANALYSIS:
-📊 Transcript size growth: 281 characters (~70 tokens)
-📊 This represents what was ADDED to conversation history between turn 1 and turn 2
-
-🔬 SESSION _TRANSCRIPT INSPECTION (AFTER TURN 2):
-🔬   _transcript size: 1688 characters (~422 tokens)
-🔬   Growth from turn 1 to turn 2: 955 characters (~238 tokens)
-🔬   ⚠️ FOUND 'jsxContent' in _transcript!
-🔬   ⚠️   Occurrences: 1
-
-================================================================================
-🔬 DIAGNOSTIC COMPLETE
-================================================================================
-✔ Test "adapterModel_DiagnosticInspectTranscriptEntries" passed after 17.150 seconds.
-✔ Suite LanguageModelComparisonTests_v4 passed after 17.151 seconds.
-✔ Test run with 1 test in 1 suite passed after 17.151 seconds.

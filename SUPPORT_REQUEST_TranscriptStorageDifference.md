@@ -1,8 +1,8 @@
-# Support Request: Transcript Storage Difference Between Base Model and Adapter Model
+# Support Request: Context Window Exhaustion in Adapter Model Multi-Turn Conversations
 
 ## Issue Summary
 
-The adapter model stores full JSX content in transcript entries, causing context window exhaustion, while the base model stores compact references. This prevents the adapter model from making tool calls after the first turn in multi-turn conversations.
+The adapter model hits context window limits (3776 tokens exceeds 4096) on Turn 2 of multi-turn conversations, while the base model successfully completes multiple turns. Investigation reveals both models store full JSX content in transcript entries, but the adapter model's system prompt handling differs, causing context window exhaustion.
 
 ---
 
@@ -13,11 +13,48 @@ Both diagnostic tests use identical configuration:
 ### System Prompt
 - **Version**: `systemPrompt_v4`
 - **Source**: `Constants.Prompts.systemPrompt_v4`
-- **Content**: Full system prompt including:
-  - Instructions for Übersicht widget design
-  - Tool usage guidelines for `WriteUbersichtWidgetToFileSystem`
-  - Übersicht Widget API documentation
-  - Examples and rules
+- **Full Text**:
+```
+A conversation between a user and a helpful assistant. You are an Übersicht widget designer. Create Übersicht widgets when requested by the user.
+
+IMPORTANT: You have access to a tool called WriteUbersichtWidgetToFileSystem. You MUST call this tool whenever:
+- Creating a new widget
+- Modifying or updating an existing widget
+- Making any changes to widget code requested by the user
+
+### Tool Usage:
+Call WriteUbersichtWidgetToFileSystem with complete JSX code that implements the Übersicht Widget API. 
+- For new widgets: Generate custom JSX based on the user's specific request
+- For modifications: Generate the updated/complete widget code incorporating the requested changes
+Always provide the complete, final widget code - do not copy the example below.
+
+### Übersicht Widget API:
+Übersicht widgets should export at least one of these properties (all are optional, but most widgets use them):
+- export const command: The bash command to execute (string or function). Optional - if refreshFrequency is false, command is not needed.
+- export const refreshFrequency: Refresh rate in milliseconds (number). Optional - defaults to 1000ms if not provided. Can be set to false to disable auto-refresh.
+- export const render: React component function that receives props (function). Optional - defaults to returning output if not provided.
+- export const className: CSS positioning for absolute placement (string or object). Optional - used for positioning/styling the widget.
+
+IMPORTANT: Use "export const" syntax, NOT comments. Each export must be on its own line with proper syntax.
+
+Example format (customize for each request):
+WriteUbersichtWidgetToFileSystem({"jsxContent": "export const command = \"echo hello\";\nexport const refreshFrequency = 1000;\nexport const render = ({output}) => {\n  return <div>{output}</div>;\n};\nexport const className = \"top: 20px; left: 20px;\";"})
+
+### Rules:
+- The terms "ubersicht widget", "widget", "a widget", "the widget" must all be interpreted as "Übersicht widget"
+- Generate complete, valid JSX code that follows the Übersicht widget API
+- When you create OR modify a widget, you MUST call the WriteUbersichtWidgetToFileSystem tool with the complete updated code
+- For modifications: Generate the full widget code with all changes incorporated, then call the tool
+- Report the results to the user after calling the tool
+
+### Examples:
+- "Generate a Übersicht widget" → Use WriteUbersichtWidgetToFileSystem tool
+- "Can you add a widget that shows the time" → Use WriteUbersichtWidgetToFileSystem tool
+- "Create a widget with a button" → Use WriteUbersichtWidgetToFileSystem tool
+- "Make the font bigger" → Generate updated widget code → Use WriteUbersichtWidgetToFileSystem tool
+- "Change the color to blue" → Generate updated widget code → Use WriteUbersichtWidgetToFileSystem tool
+- "Add a border to the widget" → Generate updated widget code → Use WriteUbersichtWidgetToFileSystem tool
+```
 
 ### User Prompts
 Both tests use the centralized prompt sequence from `ContextWindowTestPrompts`:
@@ -61,27 +98,27 @@ Sections are separated by horizontal lines (`===================================
 ### Base Model Test (`baseModel_DiagnosticInspectTranscriptEntries.log`)
 
 #### Baseline (Before Turn 1)
-- **Line 16**: `_transcript size: 2965 characters (~741 tokens)`
-- **Lines 18-19**: Contains full `systemPrompt_v4` constant in transcript
-- **Observation**: System prompt is included in transcript from the start
+- **Line 16**: `_transcript size: 2965 characters (~741 tokens)` (line 16: `_transcript size: 2965 characters (~741 tokens)`)
+- **Lines 18-26**: Contains full `systemPrompt_v4` constant in transcript (lines 18-26: preview shows system prompt text starting with "A conversation between a user and a helpful assistant...")
+- **Observation**: System prompt is stored in the transcript from the start
 
 #### Turn 1 Execution
-- **Line 34**: Tool called successfully: `🔧 TOOL CALL #589B6B30 - WriteUbersichtWidgetToFileSystem`
-- **Line 35**: JSX Content: 269 characters passed to tool
-- **Line 47**: File saved successfully: `✅ FILE SAVED #589B6B30 successfully`
-- **Line 54**: Tool call entry size: 338 characters
-- **Line 72**: Total transcript entries: 565 characters (~141 tokens)
-- **Line 74**: `JSX/Argument content found: ❌ NO` - No full JSX in transcript entry properties
+- **Line 33**: User prompt sent: `"generate a widget that says \"abc as easy as 123\""` (line 33: `📝 User: generate a widget that says "abc as easy as 123"`)
+- **Line 75**: Tool call entry shows full JSX content: `(ToolCalls) WriteUbersichtWidgetToFileSystem: {"jsxContent": "export const command = null;\nexport const refreshFrequency = 1000;\nexport const render = ({output}) => { \n  return <div>{output}</div>;\n};\nexport const className = \"top: 20px;\";\n"}` (line 75: Full entry string representation shows complete JSON with jsxContent)
+- **Line 100**: Total transcript size: 719 characters (~179 tokens) (line 100: `📊 Total transcript size: 719 characters (~179 tokens)`)
+- **Line 102**: `JSX/Argument content found: ❌ NO` - Diagnostic check didn't find JSX in entry properties (line 102: `JSX/Argument content found: ❌ NO`)
 
 #### Before Turn 2 Inspection
-- **Line 77**: `_transcript size: 3618 characters (~904 tokens)`
-- **Lines 79-94**: Preview shows system prompt text, not full JSX in tool calls
-- **Line 96**: `jsxContent` occurrences: 2 (in system prompt/tool definition, not in tool call entries)
+- **Line 105**: `_transcript size: 3772 characters (~943 tokens)` (line 105: `_transcript size: 3772 characters (~943 tokens)`)
+- **Lines 107-122**: Preview shows system prompt text in transcript (lines 107-122: preview shows full system prompt starting with "A conversation between a user and a helpful assistant...")
+- **Line 123**: `jsxContent` occurrences: 2 (line 123: `⚠️   Occurrences: 2`)
+- **Observation**: System prompt (2965 chars) + Turn 1 entries (719 chars) = ~3684 chars, actual transcript is 3772 chars
 
 #### Turn 2 Execution
-- **Line 104**: Tool called successfully: `🔧 TOOL CALL #9FC4E005 - WriteUbersichtWidgetToFileSystem`
-- **Line 117**: File saved successfully: `✅ FILE SAVED #9FC4E005 successfully`
-- **Line 128**: Transcript growth: Only 23 characters (~5 tokens) added between turns
+- **Line 131**: User prompt sent: `"move it to the top-right corner"` (line 131: `📝 User: move it to the top-right corner`)
+- **Line 169**: Tool call entry size: 448 characters (~112 tokens) (line 169: `📊 Tool call entry size: 448 characters (~112 tokens)`)
+- **Line 174**: Transcript growth: 115 characters (~28 tokens) added between turns (line 174: `📊 Transcript size growth: 115 characters (~28 tokens)`)
+- **Line 178**: After Turn 2: `_transcript size: 4677 characters (~1169 tokens)` (line 178: `_transcript size: 4677 characters (~1169 tokens)`)
 - **Result**: ✅ Success - Both turns completed successfully
 
 ---
@@ -89,30 +126,26 @@ Sections are separated by horizontal lines (`===================================
 ### Adapter Model Test (`adapterModel_DiagnosticInspectTranscriptEntries.log`)
 
 #### Baseline (Before Turn 1)
-- **Line 16**: `_transcript size: 38 characters (~9 tokens)`
-- **Line 18**: `Transcript(entries: [(Instructions) ])` - Almost empty
-- **Observation**: No system prompt in transcript (likely embedded in adapter weights)
+- **Line 16**: `_transcript size: 38 characters (~9 tokens)` (line 16: `_transcript size: 38 characters (~9 tokens)`)
+- **Line 18**: `Transcript(entries: [(Instructions) ])` - Almost empty (line 18: `Transcript(entries: [(Instructions) ])`)
+- **Observation**: System prompt is NOT stored in transcript (likely embedded in adapter weights or handled separately)
 
 #### Turn 1 Execution
-- **Line 26**: Tool called successfully: `🔧 TOOL CALL #EB42B3AD - WriteUbersichtWidgetToFileSystem`
-- **Line 27**: JSX Content: 268 characters passed to tool
-- **Line 41**: File saved successfully: `✅ FILE SAVED #EB42B3AD successfully`
-- **Line 48**: Tool call entry size: 339 characters
-- **Line 66**: Total transcript entries: 607 characters (~151 tokens)
-- **Line 68**: `JSX/Argument content found: ❌ NO` - Diagnostic didn't find JSX in entry properties
+- **Line 25**: User prompt sent: `"generate a widget that says \"abc as easy as 123\""` (line 25: `📝 User: generate a widget that says "abc as easy as 123"`)
+- **Line 55**: Tool call entry shows full JSX content: `(ToolCalls) WriteUbersichtWidgetToFileSystem: {"jsxContent": "// {command} {refreshFrequency} {render} {className}"}` (line 55: Full entry string representation shows complete JSON with jsxContent)
+- **Line 76**: Total transcript size: 382 characters (~95 tokens) (line 76: `📊 Total transcript size: 382 characters (~95 tokens)`)
+- **Line 78**: `JSX/Argument content found: ❌ NO` - Diagnostic check didn't find JSX in entry properties (line 78: `JSX/Argument content found: ❌ NO`)
 
 #### Before Turn 2 Inspection
-- **Line 71**: `_transcript size: 733 characters (~183 tokens)`
-- **Lines 73-74**: Preview shows **FULL JSX CONTENT** embedded in transcript:
-  ```
-  (ToolCalls) WriteUbersichtWidgetToFileSystem: {"jsxContent": "import { command, refreshFrequency, render, className } from 'uebersicht';\n\nexport const command = () => { return 'abc as easy as 123'; }\n\nexport const refreshFrequency = 1000 * 60 * 60 * 24; // refresh every 1 day\n\nexport const render = ({ command }) => `\n<div class="}
-  ```
-- **Line 76**: `jsxContent` occurrences: 1 (in the actual tool call entry)
+- **Line 81**: `_transcript size: 508 characters (~127 tokens)` (line 81: `_transcript size: 508 characters (~127 tokens)`)
+- **Lines 83-84**: Preview shows transcript entries including full JSX in tool call: `Transcript(entries: [(Instructions) , (Prompt) generate a widget that says "abc as easy as 123" Response Format: <nil>, (ToolCalls) WriteUbersichtWidgetToFileSystem: {"jsxContent": "// {command} {refreshFrequency} {render} {className}"}, ...]` (lines 83-84: preview shows full transcript structure with tool call containing jsxContent)
+- **Line 86**: `jsxContent` occurrences: 1 (in the actual tool call entry) (line 86: `⚠️   Occurrences: 1`)
+- **Observation**: Transcript only contains Turn 1 entries (382 chars) + some overhead = 508 chars. System prompt is NOT in transcript.
 
 #### Turn 2 Execution
-- **Line 83**: User prompt sent: `"move it to the top-right corner"`
-- **Line 85**: Only 1 transcript entry (error entry, no tool call)
-- **Line 90**: Tool call entry size: 0 characters
+- **Line 93**: User prompt sent: `"move it to the top-right corner"` (line 93: `📝 User: move it to the top-right corner`)
+- **Line 96**: Context window exceeded: `Content contains 3776 tokens, which exceeds the maximum allowed context size of 4096` (line 96: `❌ Error: Content contains 3776 tokens, which exceeds the maximum allowed context size of 4096.`)
+- **Line 106**: Context window exceeded: 3708 tokens / 4096 max (line 106: `📊 Context window exceeded: 3708 tokens / 4096 max`)
 - **Result**: ❌ Failure - Context window exceeded before Turn 2 could complete
 
 ---
@@ -121,41 +154,77 @@ Sections are separated by horizontal lines (`===================================
 
 ### Key Finding
 
-**The adapter model stores full JSX content in transcript entries, while the base model stores compact references.**
+**Both models store full JSX content in transcript entries. The difference is in system prompt handling: the base model stores the system prompt in the transcript, while the adapter model does not, but the adapter model still includes the system prompt when building context for API calls, causing context window exhaustion.**
 
 ### Evidence
 
-#### Base Model Behavior
-- **Tool calls are stored compactly**: The transcript entry (line 54: `338 characters`) contains a reference to the tool call, not the full JSX arguments
-- **No JSX in transcript entries**: Line 74 confirms `JSX/Argument content found: ❌ NO`
-- **Preview shows system prompt**: Lines 79-94 show system prompt text, not full JSX in tool calls
-- **jsxContent in system prompt only**: Line 96 shows 2 occurrences, both in system prompt/tool definition
+#### Tool Call Storage (Both Models)
+- **Both models store full JSX**: 
+  - Base model (line 75): `(ToolCalls) WriteUbersichtWidgetToFileSystem: {"jsxContent": "export const command = null;\nexport const refreshFrequency = 1000;..."}`
+  - Adapter model (line 55): `(ToolCalls) WriteUbersichtWidgetToFileSystem: {"jsxContent": "// {command} {refreshFrequency} {render} {className}"}`
+- **No "compact" storage difference**: Both models store the complete JSON with `jsxContent` in transcript entries
+- **Same storage format**: Both use identical `{"jsxContent": "..."}` format in tool call entries
 
-#### Adapter Model Behavior
-- **Full JSX stored in transcript**: Lines 73-74 show the complete `jsxContent` JSON embedded in the `(ToolCalls)` entry
-- **jsxContent in tool call entry**: Line 76 shows 1 occurrence, which is in the actual tool call entry
-- **Full content re-sent on Turn 2**: The entire JSX from Turn 1 is included in the context sent to the model on Turn 2
+#### System Prompt Handling (Critical Difference)
+
+**Base Model:**
+- **System prompt stored in transcript**: Baseline shows 2965 characters (~741 tokens) which is the full system prompt (line 16)
+- **Visible in transcript preview**: Lines 107-122 show the full system prompt text in the transcript
+- **Before Turn 2 transcript**: 3772 characters (~943 tokens) = system prompt (2965) + Turn 1 entries (719) + overhead
+- **System prompt counted in transcript size**: The transcript inspection accurately reflects what's sent to the API
+
+**Adapter Model:**
+- **System prompt NOT stored in transcript**: Baseline shows only 38 characters (~9 tokens) - just empty `(Instructions)` entry (line 16)
+- **NOT visible in transcript preview**: Lines 83-84 show transcript entries but no system prompt text
+- **Before Turn 2 transcript**: 508 characters (~127 tokens) = only Turn 1 entries (382) + overhead
+- **System prompt NOT counted in transcript size**: The transcript inspection does NOT show the system prompt, but it's still included when building context for language model API calls (requests to the model service, not tool calls)
+
+### The Problem
+
+When the adapter model builds the context for Turn 2 language model API call (the request sent to the model service to generate a response):
+1. **Transcript shows**: 508 characters (~127 tokens)
+2. **Actual context sent to model API**: 3776 tokens (exceeds 4096 limit)
+3. **Difference**: ~3649 tokens unaccounted for in transcript inspection
+
+This suggests the adapter model's framework is:
+- Including the system prompt (~741 tokens) when building context for language model API requests
+- Including additional overhead or serialization
+- Not reflecting this in the `_transcript` property that's being inspected
+
+The base model, in contrast:
+- Stores system prompt in transcript (visible in inspection)
+- Transcript size accurately reflects what's sent to the language model API
+- No hidden context additions
+
+**Note**: "API calls" here refers to calls to the language model's API (FoundationModels framework → model service), not calls to the custom tool (`WriteUbersichtWidgetToFileSystem`). Tool calls are made BY the model in response to API requests.
 
 ### Impact
 
-1. **Context Window Growth**:
-   - Base model: ~163 tokens added from baseline to before Turn 2 (line 77: 3618 chars = ~904 tokens vs line 16: 2965 chars = ~741 tokens)
-   - Adapter model: ~174 tokens added from baseline to before Turn 2 (line 71: 733 chars = ~183 tokens vs line 16: 38 chars = ~9 tokens)
-   - **However**: The adapter's transcript preview (lines 73-74) shows full JSX is stored, which will be re-sent on every subsequent turn
+1. **Context Window Calculation**:
+   - Base model: Transcript inspection (3772 chars = ~943 tokens) accurately reflects language model API context size
+   - Adapter model: Transcript inspection (508 chars = ~127 tokens) does NOT reflect actual language model API context size (3776 tokens)
+   - **The adapter model includes ~3649 tokens that are not visible in the transcript inspection when building context for language model API requests**
 
 2. **Multi-Turn Behavior**:
    - Base model: Can complete multiple turns (11 turns with ~4% context usage in other tests)
-   - Adapter model: Hits context window limit on Turn 2 (3694 tokens exceeds 4096 limit)
+   - Adapter model: Hits context window limit on Turn 2 (3776 tokens exceeds 4096 limit)
 
 3. **Root Cause**:
-   - The adapter model includes full tool call arguments (complete `jsxContent` JSON) in transcript entries
-   - These full arguments are included in the conversation history sent to the model on subsequent turns
-   - This causes exponential context growth with each turn
-   - The base model stores compact references, avoiding this bloat
+   - The adapter model's framework includes the system prompt when building API context, even though it's not stored in the `_transcript` property
+   - This hidden inclusion causes the context to exceed the 4096 token limit on Turn 2
+   - The base model stores the system prompt in the transcript, making it visible and accurately counted
 
 ### Conclusion
 
-The adapter model's transcript storage mechanism differs from the base model, causing full JSX content to be stored and re-sent in conversation history. This is a framework-level difference in how tool calls are serialized in the transcript, not a difference in the tool calls themselves (both models pass identical JSX to the tool).
+The issue is not in how tool calls are stored (both models store full JSX content identically), but in how the system prompt is handled:
 
-**Recommendation**: Investigate why the adapter model stores full tool call arguments in transcript entries while the base model stores compact references. This appears to be a framework behavior difference that needs to be addressed for multi-turn conversations with tool calls.
+- **Base model**: System prompt is stored in `_transcript`, making it visible and accurately counted
+- **Adapter model**: System prompt is NOT stored in `_transcript`, but is still included when building context for API calls, causing hidden context bloat
 
+**Recommendation**: Investigate why the adapter model's framework includes the system prompt in language model API context (the context sent when making requests to the model service) even though it's not stored in the `_transcript` property. The framework should either:
+1. Store the system prompt in `_transcript` (like the base model), OR
+2. Exclude the system prompt from language model API context calculations if it's truly embedded in adapter weights
+
+This framework-level difference in system prompt handling needs to be addressed for multi-turn conversations with tool calls.
+
+**Clarification**: "API calls" in this document refers to calls to the language model's API (FoundationModels framework → model service), not calls to custom tools like `WriteUbersichtWidgetToFileSystem`. Tool calls are made by the model in response to language model API requests.
