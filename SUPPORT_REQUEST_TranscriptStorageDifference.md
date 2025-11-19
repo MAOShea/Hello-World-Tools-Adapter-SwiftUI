@@ -133,6 +133,7 @@ Sections are separated by horizontal lines (`===================================
 #### Turn 1 Execution
 - **Line 25**: User prompt sent: `"generate a widget that says \"abc as easy as 123\""` (line 25: `📝 User: generate a widget that says "abc as easy as 123"`)
 - **Line 55**: Tool call entry shows full JSX content: `(ToolCalls) WriteUbersichtWidgetToFileSystem: {"jsxContent": "// {command} {refreshFrequency} {render} {className}"}` (line 55: Full entry string representation shows complete JSON with jsxContent)
+- **⚠️ CRITICAL QUALITY ISSUE**: The adapter model generated **invalid JSX code** - just a comment with placeholders: `"// {command} {refreshFrequency} {render} {className}"`. This is not valid widget code and would not work. Compare to base model which generated proper JSX with actual exports (line 75 in base model log).
 - **Line 76**: Total transcript size: 382 characters (~95 tokens) (line 76: `📊 Total transcript size: 382 characters (~95 tokens)`)
 - **Line 78**: `JSX/Argument content found: ❌ NO` - Diagnostic check didn't find JSX in entry properties (line 78: `JSX/Argument content found: ❌ NO`)
 
@@ -214,16 +215,33 @@ The base model, in contrast:
    - This hidden inclusion causes the context to exceed the 4096 token limit on Turn 2
    - The base model stores the system prompt in the transcript, making it visible and accurately counted
 
+### Additional Finding: JSX Code Quality Issue
+
+**Critical Quality Problem**: The adapter model generated **invalid JSX code** in the diagnostic test:
+- **Adapter model output**: `"// {command} {refreshFrequency} {render} {className}"` - Just a comment with placeholders, not executable code
+- **Base model output**: `"export const command = null;\nexport const refreshFrequency = 1000;\nexport const render = ({output}) => { \n  return <div>{output}</div>;\n};\nexport const className = \"top: 20px;\";\n"` - Valid, executable widget code
+
+This is particularly concerning because the adapter model was fine-tuned specifically for this task, yet it's producing worse output than the base model. This suggests either:
+1. The fine-tuning data contained poor examples
+2. The adapter model is not properly following the system prompt instructions
+3. There's an issue with how the adapter model generates tool call arguments
+
+**Note**: This quality issue is separate from the context window problem but indicates a fundamental problem with the adapter model's performance on this task.
+
 ### Conclusion
 
 The issue is not in how tool calls are stored (both models store full JSX content identically), but in how the system prompt is handled:
 
-- **Base model**: System prompt is stored in `_transcript`, making it visible and accurately counted
-- **Adapter model**: System prompt is NOT stored in `_transcript`, but is still included when building context for API calls, causing hidden context bloat
+- **Base model**: System prompt is stored in `_transcript`, making it visible and accurately counted. Also generates valid JSX code.
+- **Adapter model**: System prompt is NOT stored in `_transcript`, but is still included when building context for API calls, causing hidden context bloat. Additionally generates invalid JSX code (placeholder comments instead of actual widget code).
 
-**Recommendation**: Investigate why the adapter model's framework includes the system prompt in language model API context (the context sent when making requests to the model service) even though it's not stored in the `_transcript` property. The framework should either:
-1. Store the system prompt in `_transcript` (like the base model), OR
-2. Exclude the system prompt from language model API context calculations if it's truly embedded in adapter weights
+**Recommendations**: 
+
+1. **Context Window Issue**: Investigate why the adapter model's framework includes the system prompt in language model API context (the context sent when making requests to the model service) even though it's not stored in the `_transcript` property. The framework should either:
+   - Store the system prompt in `_transcript` (like the base model), OR
+   - Exclude the system prompt from language model API context calculations if it's truly embedded in adapter weights
+
+2. **Code Quality Issue**: Investigate why the adapter model generates invalid JSX code (placeholder comments) instead of proper widget code. This suggests the fine-tuning may not have been effective or the adapter model is not properly following instructions.
 
 This framework-level difference in system prompt handling needs to be addressed for multi-turn conversations with tool calls.
 
