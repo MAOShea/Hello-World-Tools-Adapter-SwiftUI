@@ -6,6 +6,26 @@ The adapter model hits context window limits (3776 tokens exceeds 4096) on Turn 
 
 ---
 
+## Table of Contents
+
+1. [Common Test Base](#1-common-test-base)
+   - System Prompt
+   - User Prompts
+   - Test Configuration
+2. [Log Files Setup](#2-log-files-setup)
+3. [Test Execution Summary](#3-test-execution-summary)
+   - Base Model Test
+   - Adapter Model Test
+4. [Analysis of the Difference](#4-analysis-of-the-difference)
+   - Tool Call Storage (Both Models)
+   - System Prompt Handling (Critical Difference)
+   - The Problem
+   - Impact
+   - Additional Finding: JSX Code Quality Issue
+   - Conclusion
+
+---
+
 ## 1. Common Test Base
 
 Both diagnostic tests use identical configuration:
