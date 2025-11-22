@@ -1,0 +1,42 @@
+◇ Test run started.
+↳ Testing Library Version: 1083
+↳ Target Platform: arm64e-apple-macos14.0
+◇ Suite LanguageModelComparisonTests_v4 started.
+◇ Test "adapterModel_DiagnosticInspectTranscriptEntries" started.
+
+🔬 DIAGNOSTIC: TRANSCRIPT ENTRIES INSPECTION - ADAPTER MODEL
+🔬 Investigating why adapter model context window grows to ~3732 tokens on turn 2
+================================================================================
+
+================================================================================
+🔬 TESTING: Adapter Model
+================================================================================
+
+🔬 SESSION _TRANSCRIPT INSPECTION (BEFORE TURN 1 - BASELINE):
+🔬   _transcript size: 246 characters (~61 tokens)
+🔬   _transcript preview (first 500 chars):
+🔬   Transcript(entries: [(Instructions) You are an expert Übersicht widget designer. Generate concise, valid JSX for widgets using the WriteUbersichtWidgetToFileSystem tool. Follow tool guidelines exactly. Keep responses brief and focused on edits.])
+
+================================================================================
+🔄 TURN 1
+================================================================================
+
+📝 TURN 1: Creating initial widget
+📝 User: generate a widget that says "abc as easy as 123"
+
+❌ CONTEXT WINDOW EXCEEDED ON TURN 1!
+❌ Error: Content contains 3869 tokens, which exceeds the maximum allowed context size of 4096.
+❌ This is WORSE than before - failing on turn 1 instead of turn 2
+
+🔬 SESSION _TRANSCRIPT INSPECTION (AFTER FAILED TURN 1):
+🔬   _transcript size: 246 characters (~61 tokens)
+🔬   Growth from baseline to failed turn 1: 0 characters (~0 tokens)
+🔬   _transcript preview (first 2000 chars):
+🔬   Transcript(entries: [(Instructions) You are an expert Übersicht widget designer. Generate concise, valid JSX for widgets using the WriteUbersichtWidgetToFileSystem tool. Follow tool guidelines exactly. Keep responses brief and focused on edits.])
+
+📊 TURN 1 SUMMARY (FAILED):
+📊 Context window exceeded: 3910 tokens / 4096 max
+📊 This indicates something is consuming tokens even before the first user prompt
+✔ Test "adapterModel_DiagnosticInspectTranscriptEntries" passed after 280.281 seconds.
+✔ Suite LanguageModelComparisonTests_v4 passed after 280.281 seconds.
+✔ Test run with 1 test in 1 suite passed after 280.282 seconds.

@@ -38,14 +38,13 @@ public final class ToolsEnabledAIService: AIServiceProtocol, @unchecked Sendable
                     model: customAdapterModel,
                     tools: [WriteUbersichtWidgetToFileSystem(),
     //                        ListDataSourcesTool()
-                        ]
+                            ]
                 )
             }
             else {
                 session = LanguageModelSession(
                     tools: [WriteUbersichtWidgetToFileSystem()],
-/*                    instructions: Constants.Prompts.humanRolePrompt2 */
-                    instructions: Constants.Prompts.systemPrompt_v4
+/*                  instructions: Constants.Prompts.systemPrompt_v4 */
                 )
             }
             session.prewarm()

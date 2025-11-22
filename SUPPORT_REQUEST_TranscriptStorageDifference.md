@@ -22,6 +22,7 @@ The adapter model hits context window limits (3776 tokens exceeds 4096) on Turn 
    - The Problem
    - Impact
    - Additional Finding: JSX Code Quality Issue
+   - Additional Finding: Passing Instructions Makes Context Window Problem Worse
    - Conclusion
 
 ---
@@ -248,6 +249,34 @@ This is particularly concerning because the adapter model was fine-tuned specifi
 
 **Note**: This quality issue is separate from the context window problem but indicates a fundamental problem with the adapter model's performance on this task.
 
+### Additional Finding: Passing Instructions Makes Context Window Problem Worse
+
+**Critical Discovery**: When short instructions are passed to the `LanguageModelSession` instantiation for the adapter model, the context window problem becomes **significantly worse**:
+
+**Test Comparison**:
+- **Without instructions** (`adapterModel_DiagnosticInspectTranscriptEntries.log`):
+  - Baseline: 38 characters (~9 tokens) - empty `(Instructions)`
+  - Turn 1: ✅ Completed successfully
+  - Turn 2: ❌ Failed with 3776 tokens (exceeds 4096)
+  
+- **With short instructions** (`adapterModel_DiagnosticInspectTranscriptEntries_withShortInstructions.log`):
+  - Baseline: 246 characters (~61 tokens) - contains: "You are an expert Übersicht widget designer. Generate concise, valid JSX for widgets using the WriteUbersichtWidgetToFileSystem tool. Follow tool guidelines exactly. Keep responses brief and focused on edits."
+  - Turn 1: ❌ **Failed immediately** with 3869 tokens (exceeds 4096)
+  - **Result**: Fails on Turn 1 instead of Turn 2 - **worse behavior**
+
+**Analysis**:
+- Transcript shows only 246 characters (~61 tokens) in baseline
+- Actual context sent to model API: 3869 tokens
+- **Difference**: ~3623 tokens unaccounted for in transcript inspection
+
+**Root Cause Hypothesis**: The adapter model appears to be including **both**:
+1. The instructions passed to the session (visible in transcript: 246 chars)
+2. The full system prompt from the training set (hidden, not in transcript)
+
+This suggests the adapter model's framework is **double-counting** or **additively including** both the passed instructions and the embedded system prompt, causing even more context bloat.
+
+**Implication**: The adapter model should rely on its embedded system prompt (from fine-tuning) and **should not require additional instructions** to be passed. Passing instructions makes the context window problem worse, not better.
+
 ### Conclusion
 
 The issue is not in how tool calls are stored (both models store full JSX content identically), but in how the system prompt is handled:
@@ -262,6 +291,11 @@ The issue is not in how tool calls are stored (both models store full JSX conten
    - Exclude the system prompt from language model API context calculations if it's truly embedded in adapter weights
 
 2. **Code Quality Issue**: Investigate why the adapter model generates invalid JSX code (placeholder comments) instead of proper widget code. This suggests the fine-tuning may not have been effective or the adapter model is not properly following instructions.
+
+3. **Instructions Handling Issue**: Investigate why passing instructions to the adapter model session makes the context window problem worse (fails on Turn 1 instead of Turn 2). The adapter model appears to be including both the passed instructions AND the embedded system prompt from training, causing additive context bloat. The framework should either:
+   - Use only the embedded system prompt (from fine-tuning) and ignore passed instructions, OR
+   - Use only the passed instructions and exclude the embedded system prompt, OR
+   - Properly account for both in transcript inspection so the actual context size is visible
 
 This framework-level difference in system prompt handling needs to be addressed for multi-turn conversations with tool calls.
 

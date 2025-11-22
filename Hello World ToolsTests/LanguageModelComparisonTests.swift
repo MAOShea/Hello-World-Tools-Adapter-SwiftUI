@@ -169,10 +169,7 @@ struct SessionFactory {
         case .adapter(let adapterURL):
             let adapter = try SystemLanguageModel.Adapter(fileURL: adapterURL)
             let customAdapterModel = SystemLanguageModel(adapter: adapter)
-            
-            // Note: Adapter models may not support custom instructions in the same way
-            // The adapter itself may contain the instructions, so we don't pass them here
-            // If you need to test with instructions, you may need to create separate adapters
+
             return LanguageModelSession(
                 model: customAdapterModel,
                 tools: tools
