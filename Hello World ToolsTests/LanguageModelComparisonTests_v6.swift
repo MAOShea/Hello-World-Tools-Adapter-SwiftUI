@@ -1,15 +1,15 @@
 //
-//  LanguageModelComparisonTests_v5.swift
+//  LanguageModelComparisonTests_v6.swift
 //  Hello World ToolsTests
 //
-//  Version-specific tests for systemPrompt_v5
+//  Version-specific tests for systemPrompt_v6
 //
 
 import Testing
 import Foundation
 @testable import Hello_World_Tools
 
-struct LanguageModelComparisonTests_v5 {
+struct LanguageModelComparisonTests_v6 {
     
     // MARK: - Simple Widget Request
     
@@ -25,7 +25,7 @@ struct LanguageModelComparisonTests_v5 {
         let result = await runner.runTest(
             testCase: testCase,
             modelType: .base,
-            systemPrompt: .systemPrompt_v5
+            systemPrompt: .systemPrompt_v6
         )
         
         #expect(result.succeeded, "Base model should succeed")
@@ -34,7 +34,7 @@ struct LanguageModelComparisonTests_v5 {
     
     @Test("adapterModel_SimpleWidgetRequest")
     func adapterModel_SimpleWidgetRequest() async throws {
-        let runner = TestRunner(adapterURL: URL(filePath: "/Users/mike/Documents/TrainUSAdapter/trained_adapter/adapter_systemPrompt_v5.fmadapter"))
+        let runner = TestRunner(adapterURL: URL(filePath: "/Users/mike/Documents/TrainUSAdapter/trained_adapter/adapter_systemPrompt_v6.fmadapter"))
         let testCase = TestCase(
             name: "Simple Widget Request",
             userPrompt: "generate a widget that says \"abc as easy as 123\"",
@@ -44,7 +44,7 @@ struct LanguageModelComparisonTests_v5 {
         let result = await runner.runTest(
             testCase: testCase,
             modelType: .adapter(runner.adapterURL),
-            systemPrompt: .systemPrompt_v5
+            systemPrompt: .systemPrompt_v6
         )
         
         #expect(result.succeeded, "Adapter model should succeed")
@@ -65,7 +65,7 @@ struct LanguageModelComparisonTests_v5 {
         let result = await runner.runTest(
             testCase: testCase,
             modelType: .base,
-            systemPrompt: .systemPrompt_v5
+            systemPrompt: .systemPrompt_v6
         )
         
         #expect(result.succeeded, "Base model should succeed")
@@ -74,7 +74,7 @@ struct LanguageModelComparisonTests_v5 {
     
     @Test("adapterModel_TimeWidgetRequest")
     func adapterModel_TimeWidgetRequest() async throws {
-        let runner = TestRunner(adapterURL: URL(filePath: "/Users/mike/Documents/TrainUSAdapter/trained_adapter/adapter_systemPrompt_v5.fmadapter"))
+        let runner = TestRunner(adapterURL: URL(filePath: "/Users/mike/Documents/TrainUSAdapter/trained_adapter/adapter_systemPrompt_v6.fmadapter"))
         let testCase = TestCase(
             name: "Time Widget Request",
             userPrompt: "create a widget that shows the current time",
@@ -84,7 +84,7 @@ struct LanguageModelComparisonTests_v5 {
         let result = await runner.runTest(
             testCase: testCase,
             modelType: .adapter(runner.adapterURL),
-            systemPrompt: .systemPrompt_v5
+            systemPrompt: .systemPrompt_v6
         )
         
         #expect(result.succeeded, "Adapter model should succeed")
@@ -105,7 +105,7 @@ struct LanguageModelComparisonTests_v5 {
         let result = await runner.runTest(
             testCase: testCase,
             modelType: .base,
-            systemPrompt: .systemPrompt_v5
+            systemPrompt: .systemPrompt_v6
         )
         
         #expect(result.succeeded, "Base model should succeed")
@@ -114,7 +114,7 @@ struct LanguageModelComparisonTests_v5 {
     
     @Test("adapterModel_ButtonWidgetRequest")
     func adapterModel_ButtonWidgetRequest() async throws {
-        let runner = TestRunner(adapterURL: URL(filePath: "/Users/mike/Documents/TrainUSAdapter/trained_adapter/adapter_systemPrompt_v5.fmadapter"))
+        let runner = TestRunner(adapterURL: URL(filePath: "/Users/mike/Documents/TrainUSAdapter/trained_adapter/adapter_systemPrompt_v6.fmadapter"))
         let testCase = TestCase(
             name: "Button Widget Request",
             userPrompt: "generate a widget with a button labelled \"I love you.\"",
@@ -124,7 +124,7 @@ struct LanguageModelComparisonTests_v5 {
         let result = await runner.runTest(
             testCase: testCase,
             modelType: .adapter(runner.adapterURL),
-            systemPrompt: .systemPrompt_v5
+            systemPrompt: .systemPrompt_v6
         )
         
         #expect(result.succeeded, "Adapter model should succeed")

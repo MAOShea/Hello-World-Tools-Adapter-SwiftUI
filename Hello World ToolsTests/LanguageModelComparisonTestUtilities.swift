@@ -205,3 +205,103 @@ struct SharedTestFunctions {
     }
 }
 
+// MARK: - System Prompt Library
+
+struct SystemPromptEntry: Decodable {
+    let name: String
+    let content: String
+    let length: Int?
+    let hasTools: Bool?
+    let toolCount: Int?
+    let date: String?
+    let id: Double?
+    let source: String?
+}
+
+enum SystemPromptLibraryError: Error {
+    case fileNotFound(String)
+    case invalidData(String)
+    case promptNotFound(String)
+}
+
+struct SystemPromptLibrary {
+    private static let systemPromptsPath = "/Users/mike/Documents/TrainUSAdapter/system_prompts.json"
+    private static var cachedPrompts: [SystemPromptEntry]?
+    
+    static func loadSystemPrompts() throws -> [SystemPromptEntry] {
+        if let cachedPrompts {
+            return cachedPrompts
+        }
+        
+        let fileURL = URL(fileURLWithPath: systemPromptsPath)
+        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+            throw SystemPromptLibraryError.fileNotFound(systemPromptsPath)
+        }
+        
+        let data = try Data(contentsOf: fileURL)
+        let decoder = JSONDecoder()
+        
+        struct SystemPromptPayload: Decodable {
+            let content: String
+            let length: Int?
+            let hasTools: Bool?
+            let toolCount: Int?
+            let date: String?
+            let id: Double?
+            let source: String?
+            
+            enum CodingKeys: String, CodingKey {
+                case content
+                case length
+                case hasTools = "has_tools"
+                case toolCount = "tool_count"
+                case date
+                case id
+                case source
+            }
+        }
+        
+        let raw = try decoder.decode([String: SystemPromptPayload].self, from: data)
+        let prompts = raw.map { key, payload in
+            SystemPromptEntry(
+                name: key,
+                content: payload.content,
+                length: payload.length,
+                hasTools: payload.hasTools,
+                toolCount: payload.toolCount,
+                date: payload.date,
+                id: payload.id,
+                source: payload.source
+            )
+        }
+        
+        cachedPrompts = prompts
+        return prompts
+    }
+    
+    static func GetFromName(string name: String) throws -> SystemPromptEntry {
+        let prompts = try loadSystemPrompts()
+        if let match = prompts.first(where: { $0.name == name }) {
+            return match
+        }
+        throw SystemPromptLibraryError.promptNotFound(name)
+    }
+    
+    static func GetFromId(string id: String) throws -> SystemPromptEntry {
+        let prompts = try loadSystemPrompts()
+        if let idValue = Double(id) {
+            if let match = prompts.first(where: { $0.id == idValue }) {
+                return match
+            }
+        }
+        
+        if let match = prompts.first(where: { entry in
+            guard let entryId = entry.id else { return false }
+            return String(entryId) == id || String(format: "%.1f", entryId) == id
+        }) {
+            return match
+        }
+        
+        throw SystemPromptLibraryError.promptNotFound(id)
+    }
+}

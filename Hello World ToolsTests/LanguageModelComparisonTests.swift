@@ -24,7 +24,8 @@ enum SystemPromptVersion: String, CaseIterable {
     case systemPrompt_v3 = "systemPrompt_v3"
     case systemPrompt_v4 = "systemPrompt_v4"
     case systemPrompt_v5 = "systemPrompt_v5"
-    
+    case systemPrompt_v6 = "systemPrompt_v6"
+
     var prompt: String {
         switch self {
         case .systemPrompt_v1:
@@ -37,6 +38,8 @@ enum SystemPromptVersion: String, CaseIterable {
             return Constants.Prompts.systemPrompt_v4
         case .systemPrompt_v5:
             return Constants.Prompts.systemPrompt_v5
+        case .systemPrompt_v6:
+            return Constants.Prompts.systemPrompt_v6
         }
     }
 }

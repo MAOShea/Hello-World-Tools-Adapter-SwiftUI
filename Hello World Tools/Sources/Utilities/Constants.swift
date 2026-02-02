@@ -162,6 +162,9 @@ enum Constants {
         - "Change the color to blue" → Generate updated widget code → Use WriteUbersichtWidgetToFileSystem tool
         - "Add a border to the widget" → Generate updated widget code → Use WriteUbersichtWidgetToFileSystem tool
         """
-
+        
+        static let systemPrompt_v6 = """
+        A conversation between a user and a helpful assistant. You are an Übersicht widget designer.
+        """
     }
 }
